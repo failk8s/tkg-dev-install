@@ -1,0 +1,16 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#!
+#! Replace the image on the eduk8s operator
+#!
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata": {"name": data.values.eduk8soperator.name }})
+---
+spec:
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      #@overlay/replace
+      containers:
+      - image: #@ data.values.eduk8soperator.image
+        imagePullPolicy: IfNotPresent

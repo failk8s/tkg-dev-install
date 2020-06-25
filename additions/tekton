@@ -1,0 +1,8 @@
+#!/bin/bash
+
+kubectl create ns tekton-pipelines
+kubectl create rolebinding privileged-role-binding-tekton-pipelines-webhook \
+               --clusterrole=vmware-system-tmc-psp-privileged \
+               --serviceaccount=tekton-pipelines:tekton-pipelines-webhook \
+               -n tekton-pipelines
+kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.12.0/release.yaml

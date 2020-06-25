@@ -1,0 +1,404 @@
+#!/bin/bash
+
+# https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+set -uo pipefail
+
+#install_log=$(mktemp install.log.XXXXXX)
+install_log=install.log
+
+SCRIPT_NAME=$(basename "$0")
+# Handle source locations that might be a symlink (ref: http://bit.ly/2kcvSCS)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+WORK_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+#
+# Colors for echo
+# 
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+CLUSTER=`kubectl config view -o jsonpath='{ .contexts[?(@.name == "'$(kubectl config current-context 2>/dev/null)'")].context.cluster }' 2>/dev/null`
+[ "x$CLUSTER" == "x" ] && echo "kubectl could not determine current cluster or is not installed" && exit 1
+
+
+#
+# CLI_ARGS
+SHOW_HELP="n"
+OVERRIDE_FILE=${OVERRIDE_FILE:-""}
+OVERLAY_FILE=${OVERLAY_FILE:-""}
+CONFIRM=${CONFIRM:-""}
+VERIFY=${VERIFY:-""}
+
+function help {
+  echo "This is the ${FUNCNAME[0]} for ${SCRIPT_NAME}"
+  echo ""
+  echo "${SCRIPT_NAME} <COMMAND> <OPTIONS>"
+  echo ""
+  echo "Command:"
+  echo "    cert-manager       Installs cert-manager"
+  echo "    ingress            Installs an ingress controller to be used by the platform"
+  echo "    registry           Installs a clusterwide registry to be used by the platform"
+  echo "    kpack              Installs KPack to support in cluster builds using CNB"
+  echo ""
+  echo "    full               Full install"
+
+  help-options
+}
+
+function help-options {
+  echo ""
+  echo "Options:"
+  echo "    -f=<FILE>|--file=<FILE>"
+  echo "    -f|--file <FILE>           Provides an override file to change default values"
+  echo "    -c|--confirm               Don't ask for confirmation. Execute the action immediately"
+  echo "    -v|--verify                Verifies the result of the process by executing a verification step"
+  echo "    -o=<FILE>|--overlay=<FILE>"
+  echo "    -o|--overlay <FILE>        Provides an overlay file, to alter install scripts"
+  echo "    -h|--help                  Shows the help for the command"
+}
+
+function ingress {
+  parse_args $*
+
+  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
+
+  local file_opt=""
+  if [ ! -z $OVERRIDE_FILE ] ; then 
+    if [ -f $OVERRIDE_FILE ]; then
+      file_opt=" -f $OVERRIDE_FILE "
+    else
+      echo "$OVERRIDE_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  local overlay_opt=""
+  if [ ! -z $OVERLAY_FILE ] ; then 
+    if [ -f $OVERLAY_FILE ]; then
+      overlay_opt=" -f $OVERLAY_FILE "
+    else
+      echo "$OVERLAY_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
+    reply="y"
+  else
+    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
+    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
+    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
+    echo ""
+    echo -e "Are you sure you want to install an ingress with the following values? (y/n)"
+    read -n 1 -r reply
+    echo # move to a new line
+  fi
+  
+  if [[ $reply =~ ^[Yy]$ ]] ; then
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/ingress/ ${overlay_opt} | kapp deploy -a ingress --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/ingress/ ${overlay_opt} | kapp deploy -a ingress --diff-changes -n default -y -f -
+  else
+    echo "Installation cancelled"
+    exit 1
+  fi
+
+  if [ "$VERIFY" == "true" ]; then
+    ${FUNCNAME[0]}.doVerify
+  fi
+}
+
+function ingress.doVerify {
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
+  source ${WORK_DIR}/tmp/verify.sh
+  ingress.verify
+}
+
+function ingress.help { 
+  echo "Create an ingress controller" 
+  echo ""
+  echo "${SCRIPT_NAME} ingress <OPTIONS>"
+  help-options
+}
+
+function cert-manager {
+  parse_args $*
+
+  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
+
+  local file_opt=""
+  if [ ! -z $OVERRIDE_FILE ] ; then 
+    if [ -f $OVERRIDE_FILE ]; then
+      file_opt=" -f $OVERRIDE_FILE "
+    else
+      echo "$OVERRIDE_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  local overlay_opt=""
+  if [ ! -z $OVERLAY_FILE ] ; then 
+    if [ -f $OVERLAY_FILE ]; then
+      overlay_opt=" -f $OVERLAY_FILE "
+    else
+      echo "$OVERLAY_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
+    reply="y"
+  else
+    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
+    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
+    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
+    echo ""
+    echo -e "Are you sure you want to install cert-manager with the following values? (y/n)"
+    read -n 1 -r reply
+    echo # move to a new line
+  fi
+  
+  if [[ $reply =~ ^[Yy]$ ]] ; then
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/cert-manager/ ${overlay_opt} | kapp deploy -n default -a cert-manager -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/cert-manager/ ${overlay_opt} | kapp deploy -n default -a cert-manager -y -f -
+  else
+    echo "Installation cancelled"
+    exit 1
+  fi
+
+  if [ "$VERIFY" == "true" ]; then
+    ${FUNCNAME[0]}.doVerify
+  fi
+}
+
+function cert-manager.doVerify {
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
+  source ${WORK_DIR}/tmp/verify.sh
+  cert-manager.verify
+}
+
+function cert-manager.help { 
+  echo "cert-manager help <OPTIONS>"
+  help-options 
+}
+
+function registry {
+  parse_args $*
+
+  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
+
+  local file_opt=""
+  if [ ! -z $OVERRIDE_FILE ] ; then 
+    if [ -f $OVERRIDE_FILE ]; then
+      file_opt=" -f $OVERRIDE_FILE "
+    else
+      echo "$OVERRIDE_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  local overlay_opt=""
+  if [ ! -z $OVERLAY_FILE ] ; then 
+    if [ -f $OVERLAY_FILE ]; then
+      overlay_opt=" -f $OVERLAY_FILE "
+    else
+      echo "$OVERLAY_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
+    reply="y"
+  else
+    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
+    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
+    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
+    echo ""
+    echo -e "Are you sure you want to install a registry with the following values? (y/n)"
+    read -n 1 -r reply
+    echo # move to a new line
+  fi
+  
+  if [[ $reply =~ ^[Yy]$ ]] ; then
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/registry/ ${overlay_opt} | kapp deploy -a registry --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/registry/ ${overlay_opt} | kapp deploy -a registry --diff-changes -n default -y -f -
+  else
+    echo "Installation cancelled"
+    exit 1
+  fi
+
+  if [ "$VERIFY" == "true" ]; then
+    ${FUNCNAME[0]}.doVerify
+  fi
+}
+
+function registry.doVerify {
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
+  source ${WORK_DIR}/tmp/verify.sh
+  registry.verify
+}
+
+function registry.help { 
+  echo "registry help <OPTIONS>"
+  help-options 
+}
+
+function kpack {
+  parse_args $*
+
+  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
+
+  local file_opt=""
+  if [ ! -z $OVERRIDE_FILE ] ; then 
+    if [ -f $OVERRIDE_FILE ]; then
+      file_opt=" -f $OVERRIDE_FILE "
+    else
+      echo "$OVERRIDE_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  local overlay_opt=""
+  if [ ! -z $OVERLAY_FILE ] ; then 
+    if [ -f $OVERLAY_FILE ]; then
+      overlay_opt=" -f $OVERLAY_FILE "
+    else
+      echo "$OVERLAY_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
+    reply="y"
+  else
+    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
+    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
+    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
+    echo ""
+    echo -e "Are you sure you want to install kpack with the following values? (y/n)"
+    read -n 1 -r reply
+    echo # move to a new line
+  fi
+  
+  if [[ $reply =~ ^[Yy]$ ]] ; then
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kpack/ ${overlay_opt} | kapp deploy -a kpack --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kpack/ ${overlay_opt} | kapp deploy -a kpack --diff-changes -n default -y -f -
+  else
+    echo "Installation cancelled"
+    exit 1
+  fi
+
+  if [ "$VERIFY" == "true" ]; then
+    ${FUNCNAME[0]}.doVerify
+  fi
+}
+
+function kpack.doVerify {
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
+  source ${WORK_DIR}/tmp/verify.sh
+  kpack.verify
+}
+
+function kpack.help { 
+  echo "kpack help <OPTIONS>"
+  help-options 
+}
+
+function full {
+  parse_args $*
+
+  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
+
+  cert-manager
+  ingress
+  registry
+  kpack
+}
+
+function full.help {
+  echo "Installs all neccesary additional components into an existing cluster"
+  help-options   
+} 
+
+function parse_args {
+  while [[ $# -gt 0 ]]
+  do
+    local key="$1"
+    case $key in
+      -h|--help)
+        SHOW_HELP="true"
+        shift # past argument
+        ;;
+      -v|--verify)
+        VERIFY="true"
+        shift # past argument
+        ;;
+      -f|--file)
+        OVERRIDE_FILE="$2"
+        shift # past argument
+        shift # past value
+        ;;
+      -f=*|--file=*)
+        OVERRIDE_FILE="${i#*=}"
+        shift # past argument
+        ;;
+      -o|--overlay)
+        OVERLAY_FILE="$2"
+        shift # past argument
+        shift # past value
+        ;;
+      -o=*|--overlay=*)
+        OVERLAY_FILE="${i#*=}"
+        shift # past value
+        ;;
+      -c|--confirm)
+        CONFIRM="true"
+        shift # past argument
+        ;;
+      *)
+        echo "Wrong argument $key. Not supported"
+        exit 1
+        ;;
+    esac
+  done
+#  echo "SHOW_HELP=$SHOW_HELP"
+#  echo "OVERRIDE_FILE=$OVERRIDE_FILE"
+#  echo "OVERLAY_FILE=$OVERLAY_FILE"
+#  echo "CONFIRM=$CONFIRM"
+}
+
+if [[ $# -gt 0 ]]
+then
+  key="$1"
+  case $key in
+    ingress)
+      shift # past argument
+      ingress "$@"
+      ;;
+    cert-manager)
+      shift # past argument
+      cert-manager "$@"
+      ;;
+    registry)
+      shift # past argument
+      registry "$@"
+      ;;
+    kpack)
+      shift # past argument
+      kpack "$@"
+      ;;
+    full)
+      shift # past argument
+      full "$@"
+      ;;
+    *)
+      help
+      ;;
+  esac
+else
+  help
+fi

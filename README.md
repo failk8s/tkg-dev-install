@@ -1,0 +1,133 @@
+# Install Developer Tooling and capabilities on TKG
+This repository will help with the deployment and integration of developer required capabilities with Tanzu Kubernetes Grid (TKG) clusters provided by Tanzu Mission Control (TMC).
+
+TKG clusters are deployed on AWS, so you will need to be able to configure some things on AWS to get the full integration. If you have a full AWS account you can have the complete workflow automated. If you have a managed AWS account, you'll have to do some steps manually, mainly because cert-manager has [an issue yet to be resolved](https://github.com/jetstack/cert-manager/issues/2779).
+
+Developers requires:
+- Ingress controller
+- A DNS domain name
+- A wildcard certificate for that DNS domain name
+- An image registry (OPTIONAL)
+
+## Pre-requisites
+You need to have your domain configured in Route53. Create a HostedZone for your domain. You can then, use cert-manager to generate a wildcard certificate with Let's Encrypt for your DNS domain, or you can generate the certificate manually and place it in a secret on the platform.
+
+## Install with full AWS integration
+These instructions assume you have [ytt](https://get-ytt.io/) and [kapp](https://get-kapp.io/) installed. If you don't have them, go ahead and install them, or use the [k14s docker image](https://hub.docker.com/r/k14s/image).
+
+You will need an AWS IAM user/serviceaccount credentials to configure cert-manager for the DNS01 integration. You can read more [here](https://medium.com/@Amet13/wildcard-k8s-4998173b16c8)
+
+__NOTE__: Before you start installation, you need to verify you're providing the required values in [values.yaml](.k8s/values.yaml) or that you use an override file as explained later.
+
+### Create your external-dns
+You need to have 2 hosted zones in AWS Route53 for the LB that the ingress controller will create.
+  * *.<DOMAIN> 
+  * *.apps.<DOMAIN>
+Luckily, we have you covered. We will deploy external-dns so that the ingress will create this DNS records for you.
+
+```
+ytt -f k8s/values.yaml -f k8s/external-dns.yaml | kapp deploy -n default -a external-dns -y -f -
+```
+  
+### Deploy cert-manager to manage SSL certificates for you
+```
+ytt -f k8s/values.yaml -f k8s/cert-manager.yaml | kapp deploy -n default -a cert-manager -y -f -
+```
+
+### Create your ingress controller
+```
+ytt -f k8s/values.yaml -f k8s/ingress.yaml | kapp deploy -n default -a ingress -y -f -
+```
+
+### Configure cert-manager integration and request a wildcard certificate
+```
+ytt -f k8s/values.yaml -f k8s/certs.yaml | kapp deploy -n default -a certs -y -f -
+```
+
+### Deploy an image registry
+
+```
+ytt -f k8s/values.yaml -f k8s/registry.yaml | kapp deploy -n default -a registry -y -f -
+```
+
+
+## Override information
+If you need to provide your own configuration values, the easiest way is to use an override file instead of modifying the existing values.yaml file.
+
+Create an override file like this, and name it override.yml (or similar). Note that you can have multiple overide files one for each environment if you have many.
+
+```
+#@data/values
+---
+domain: failk8s.dev
+wildcard_domain: apps.failk8s.dev
+```
+
+__NOTE__: There is an [example override file](override.yml.example) for convenience. Just rename it.
+__NOTE__: You can collapse all values into a single file and use it.
+
+Use it in your ytt files after the values file. e.g:
+
+```
+export OVERRIDE=override.yaml
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/external-dns.yaml | kapp deploy -n default -a external-dns -y -f -
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/cert-manager.yaml | kapp deploy -n default -a cert-manager -y -f -
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/ingress.yaml | kapp deploy -n default -a ingress -y -f -
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/certs.yaml | kapp deploy -n default -a certs -y -f -
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/registry.yaml | kapp deploy -n default -a registry -y -f -
+```
+
+### Install without full AWS integration
+In this scenario, you will not use cert-manager to create the wildcard certificate (as that is the dependency with AWS credentials) and you can use certbot for that purpose. 
+
+* Follow the steps above to deploy the ingress controller. 
+* Generate a wildcard SSL certificate using [certbot](https://jloh.co/posts/certbot-route53-dns-validation/) (or any other tool) and place that certificate in a secret named "" in the default namespace. (NOTE that the name of secret and namespace depends on your variable values.)
+* Deploy eduks8-controller following the steps above.
+* (OPTIONAL)
+  * Deploy an image-registry (You will need to generate a certificate for the image registry yourself)
+
+
+
+
+## NOTES
+
+For external-dns to work, you need to:
+* Add __external-dns.alpha.kubernetes.io/hostname__ annotation to the envoy service in the ingress
+  * We used __external-dns.alpha.kubernetes.io/hostname: '*.test.eduk8s.io.,*.apps.test.eduk8s.io.'__ 
+* Attach a wildcard policy to the assumed role that is being used. We used: 
+  * role __nodes.tmc.cloud.vmware.com__
+  * AWS policy:
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "route53:GetChange",
+            "Resource": "arn:aws:route53:::change/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "route53:ChangeResourceRecordSets",
+            "Resource": "arn:aws:route53:::hostedzone/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "route53:ListHostedZones",
+                "route53:ListResourceRecordSets"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "route53:ListHostedZonesByName"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+After this, we have 2 new A records in the configured Hosted Zone with the provided domain and wildcard domains.

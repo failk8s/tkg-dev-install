@@ -1,0 +1,6 @@
+#@data/values
+---
+domain: failk8s.com
+wildcard_domain: training.failk8s.com
+aws_access_key_id: ABCDEFGHIJKLM
+aws_secret_access_key: abABC1ABA1B1B2c/ABc3ABc/AbcdEFgHIJkl2abC
