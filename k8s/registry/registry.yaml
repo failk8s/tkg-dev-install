@@ -1,4 +1,5 @@
 #@ load("@ytt:yaml", "yaml")
+#@ load("@ytt:json", "json")
 #@ load("@ytt:base64", "base64")
 #@ load("@ytt:data", "data")
 #@ load("@ytt:assert", "assert")
@@ -12,6 +13,8 @@ org: #@ data.values.org
 #@ end
 
 #@ registry_name = "{}.{}".format(data.values.registry.name, data.values.domain)
+#@ docker_auth = base64.encode("{}:{}".format(data.values.registry.admin.username, data.values.registry.admin.password))
+#@ docker_creds = {"username": data.values.registry.admin.username, "password": data.values.registry.admin.password, "auth": docker_auth}
 
 ---
 #@ if "default" != data.values.registry.namespace and data.values.ingress.namespace != data.values.registry.namespace:
@@ -174,3 +177,14 @@ spec:
   - hosts:
     - #@ registry_name
     secretName: wildcard
+---
+#! Secret for registry in operator install as namespace needs to exist
+apiVersion: v1
+kind: Secret
+metadata:
+  name: #@ "{}-creds".format(data.values.registry.name)
+  namespace: #@ data.values.registry.namespace
+  labels: #@ labels()
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: #@ base64.encode(json.encode({"auths": {registry_name: docker_creds}}))
