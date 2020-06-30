@@ -1,0 +1,120 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
+
+#@ d = data.values.domain or assert.fail("missing domain definition")
+#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
+#@ t = data.values.ingress.type or assert.fail("Ingress type needs to be specified")
+
+#@overlay/match by=overlay.or_op(overlay.subset({"kind": "ServiceAccount"}), overlay.subset({"kind": "ConfigMap"}), overlay.subset({"kind": "Service"}), overlay.subset({"kind": "Role"}), overlay.subset({"kind": "RoleBinding"}), overlay.subset({"kind": "Job"}), overlay.subset({"kind": "Deployment"})), expects="1+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.ingress.namespace
+
+#@overlay/match by=overlay.subset({"kind":"Namespace", "metadata":{"name": "projectcontour"}})
+#@overlay/remove
+---
+
+#@overlay/match by=overlay.subset({"kind":"RoleBinding", "metadata": {"name": "contour"}})
+---
+subjects:
+#@overlay/match by=overlay.map_key("name")
+- kind: ServiceAccount
+  name: contour-certgen
+  namespace: #@ data.values.ingress.namespace
+
+#@overlay/match by=overlay.subset({"kind":"RoleBinding", "metadata": {"name": "contour-leaderelection"}})
+---
+subjects:
+#@overlay/match by=overlay.map_key("name")
+- kind: ServiceAccount
+  name: contour
+  namespace: #@ data.values.ingress.namespace
+
+#@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata": {"name": "contour"}})
+---
+subjects:
+#@overlay/match by=overlay.map_key("name")
+- kind: ServiceAccount
+  name: contour
+  namespace: #@ data.values.ingress.namespace
+
+#@overlay/match by=overlay.subset({"kind":"RoleBinding", "metadata": {"name": "envoy-privileged"}}), missing_ok=True
+---
+subjects:
+#@overlay/match by=overlay.map_key("name")
+- kind: ServiceAccount
+  name: envoy
+  namespace: #@ data.values.ingress.namespace
+
+#@overlay/match by=overlay.subset({"kind":"Service", "metadata": {"name": "envoy"}})
+---
+metadata:
+  annotations:
+    #@overlay/match missing_ok=True
+    external-dns.alpha.kubernetes.io/hostname: #@ "*.{}.,*.{}.".format(data.values.domain, data.values.wildcard_domain)
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata": {"name": "contour"}})
+---
+data:
+  #@yaml/text-templated-strings
+  contour.yaml: |
+    # should contour expect to be running inside a k8s cluster
+    incluster: true
+    #
+    # path to kubeconfig (if not running inside a k8s cluster)
+    # kubeconfig: /path/to/.kube/config
+    #
+    # Client request timeout to be passed to Envoy
+    # as the connection manager request_timeout.
+    # Defaults to 0, which Envoy interprets as disabled.
+    # Note that this is the timeout for the whole request,
+    # not an idle timeout.
+    # request-timeout: 0s
+    # disable ingressroute permitInsecure field
+    disablePermitInsecure: false
+    tls:
+    # minimum TLS version that Contour will negotiate
+    # minimum-protocol-version: "1.1"
+    # Defines the Kubernetes name/namespace matching a secret to use
+    # as the fallback certificate when requests which don't match the
+    # SNI defined for a vhost.
+      fallback-certificate:
+        name: wildcard
+        namespace: (@= data.values.ingress.namespace @)
+    # The following config shows the defaults for the leader election.
+    # leaderelection:
+    #   configmap-name: leader-elect
+    #   configmap-namespace: (@=  data.values.ingress.namespace @)
+    ### Logging options
+    # Default setting
+    accesslog-format: envoy
+    # To enable JSON logging in Envoy
+    # accesslog-format: json
+    # The default fields that will be logged are specified below.
+    # To customise this list, just add or remove entries.
+    # The canonical list is available at
+    # https://godoc.org/github.com/projectcontour/contour/internal/envoy#JSONFields
+    # json-fields:
+    #   - "@timestamp"
+    #   - "authority"
+    #   - "bytes_received"
+    #   - "bytes_sent"
+    #   - "downstream_local_address"
+    #   - "downstream_remote_address"
+    #   - "duration"
+    #   - "method"
+    #   - "path"
+    #   - "protocol"
+    #   - "request_id"
+    #   - "requested_server_name"
+    #   - "response_code"
+    #   - "response_flags"
+    #   - "uber_trace_id"
+    #   - "upstream_cluster"
+    #   - "upstream_host"
+    #   - "upstream_local_address"
+    #   - "upstream_service_time"
+    #   - "user_agent"
+    #   - "x_forwarded_for"

@@ -100,8 +100,8 @@ function ingress {
   fi
   
   if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/ingress/ ${overlay_opt} | kapp deploy -a ingress --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/ingress/ ${overlay_opt} | kapp deploy -a ingress --diff-changes -n default -y -f -
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/ingress/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a ingress --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/ingress/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a ingress --diff-changes -n default -y -f -
   else
     echo "Installation cancelled"
     exit 1
