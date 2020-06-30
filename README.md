@@ -8,6 +8,7 @@ Developers requires:
 - A DNS domain name
 - A wildcard certificate for that DNS domain name
 - An image registry (OPTIONAL)
+- KPack building capabilities
 
 ## Pre-requisites
 You need to have your domain configured in Route53. Create a HostedZone for your domain. You can then, use cert-manager to generate a wildcard certificate with Let's Encrypt for your DNS domain, or you can generate the certificate manually and place it in a secret on the platform.
@@ -18,36 +19,32 @@ These instructions assume you have [ytt](https://get-ytt.io/) and [kapp](https:/
 You will need an AWS IAM user/serviceaccount credentials to configure cert-manager for the DNS01 integration. You can read more [here](https://medium.com/@Amet13/wildcard-k8s-4998173b16c8)
 
 __NOTE__: Before you start installation, you need to verify you're providing the required values in [values.yaml](.k8s/values.yaml) or that you use an override file as explained later.
-
-### Create your external-dns
-You need to have 2 hosted zones in AWS Route53 for the LB that the ingress controller will create.
-  * *.<DOMAIN> 
-  * *.apps.<DOMAIN>
-Luckily, we have you covered. We will deploy external-dns so that the ingress will create this DNS records for you.
-
-```
-ytt -f k8s/values.yaml -f k8s/external-dns.yaml | kapp deploy -n default -a external-dns -y -f -
-```
   
 ### Deploy cert-manager to manage SSL certificates for you
 ```
-ytt -f k8s/values.yaml -f k8s/cert-manager.yaml | kapp deploy -n default -a cert-manager -y -f -
+ytt -f k8s/values.yaml -f k8s/cert-manager.yaml --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -
 ```
 
 ### Create your ingress controller
-```
-ytt -f k8s/values.yaml -f k8s/ingress.yaml | kapp deploy -n default -a ingress -y -f -
-```
+You need to have 2 hosted zones in AWS Route53 for the LB that the ingress controller will create.
+  * *.<DOMAIN> 
+  * *.apps.<DOMAIN>
+Luckily, we have you covered. We will deploy external-dns so that the ingress will create this DNS records for you. Also, we will deploy an ingress controller that will handle your access to your wildcard domains.
 
-### Configure cert-manager integration and request a wildcard certificate
 ```
-ytt -f k8s/values.yaml -f k8s/certs.yaml | kapp deploy -n default -a certs -y -f -
+ytt -f k8s/values.yaml -f k8s/ingress --ignore-unknown-comments | kapp deploy -n default -a ingress -y -f -
 ```
 
 ### Deploy an image registry
 
 ```
-ytt -f k8s/values.yaml -f k8s/registry.yaml | kapp deploy -n default -a registry -y -f -
+ytt -f k8s/values.yaml -f k8s/registry --ignore-unknown-comments | kapp deploy -n default -a registry -y -f -
+```
+
+### Deploy image building capabilities
+
+```
+ytt -f k8s/values.yaml -f k8s/kpack --ignore-unknown-comments | kapp deploy -n default -a registry -y -f -
 ```
 
 
@@ -70,11 +67,10 @@ Use it in your ytt files after the values file. e.g:
 
 ```
 export OVERRIDE=override.yaml
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/external-dns.yaml | kapp deploy -n default -a external-dns -y -f -
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/cert-manager.yaml | kapp deploy -n default -a cert-manager -y -f -
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/ingress.yaml | kapp deploy -n default -a ingress -y -f -
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/certs.yaml | kapp deploy -n default -a certs -y -f -
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/registry.yaml | kapp deploy -n default -a registry -y -f -
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/cert-manager --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/ingress --ignore-unknown-comments | kapp deploy -n default -a ingress -y -f -
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/registry --ignore-unknown-comments | kapp deploy -n default -a registry -y -f -
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/kpack --ignore-unknown-comments | kapp deploy -n default -a kpack -y -f -
 ```
 
 ### Install without full AWS integration
