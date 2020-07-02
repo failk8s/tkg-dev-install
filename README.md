@@ -44,9 +44,15 @@ ytt -f k8s/values.yaml -f k8s/registry --ignore-unknown-comments | kapp deploy -
 ### Deploy image building capabilities
 
 ```
-ytt -f k8s/values.yaml -f k8s/kpack --ignore-unknown-comments | kapp deploy -n default -a registry -y -f -
+ytt -f k8s/values.yaml -f k8s/kpack --ignore-unknown-comments | kapp deploy -n default -a kpack -y -f -
 ```
 
+### Deploy CI/CD/Pipelines building capabilities
+
+```
+ytt -f k8s/values.yaml -f k8s/tekton/release --ignore-unknown-comments | kapp deploy -n default -a tekton -y -f -
+ytt -f k8s/values.yaml -f k8s/tekton/triggers --ignore-unknown-comments | kapp deploy -n default -a tekton-triggers -y -f -
+```
 
 ## Override information
 If you need to provide your own configuration values, the easiest way is to use an override file instead of modifying the existing values.yaml file.
@@ -71,6 +77,8 @@ ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/cert-manager --ignore-unknown-comme
 ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/ingress --ignore-unknown-comments | kapp deploy -n default -a ingress -y -f -
 ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/registry --ignore-unknown-comments | kapp deploy -n default -a registry -y -f -
 ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/kpack --ignore-unknown-comments | kapp deploy -n default -a kpack -y -f -
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/tekton/release --ignore-unknown-comments | kapp deploy -n default -a tekton -y -f -
+ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/tekton/triggers --ignore-unknown-comments | kapp deploy -n default -a tekton-triggers -y -f -
 ```
 
 ### Install without full AWS integration

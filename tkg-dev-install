@@ -44,6 +44,7 @@ function help {
   echo "    ingress            Installs an ingress controller to be used by the platform"
   echo "    registry           Installs a clusterwide registry to be used by the platform"
   echo "    kpack              Installs KPack to support in cluster builds using CNB"
+  echo "    tekton             Installs Tekton to support pipelines"
   echo ""
   echo "    full               Full install"
 
@@ -163,8 +164,8 @@ function cert-manager {
   fi
   
   if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/cert-manager/ ${overlay_opt} | kapp deploy -n default -a cert-manager -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/cert-manager/ ${overlay_opt} | kapp deploy -n default -a cert-manager -y -f -
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/cert-manager/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/cert-manager/ ${overlay_opt}  --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -
   else
     echo "Installation cancelled"
     exit 1
@@ -224,8 +225,8 @@ function registry {
   fi
   
   if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/registry/ ${overlay_opt} | kapp deploy -a registry --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/registry/ ${overlay_opt} | kapp deploy -a registry --diff-changes -n default -y -f -
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/registry/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a registry --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/registry/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a registry --diff-changes -n default -y -f -
   else
     echo "Installation cancelled"
     exit 1
@@ -285,8 +286,8 @@ function kpack {
   fi
   
   if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kpack/ ${overlay_opt} | kapp deploy -a kpack --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kpack/ ${overlay_opt} | kapp deploy -a kpack --diff-changes -n default -y -f -
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kpack/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a kpack --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kpack/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a kpack --diff-changes -n default -y -f -
   else
     echo "Installation cancelled"
     exit 1
@@ -308,6 +309,69 @@ function kpack.help {
   help-options 
 }
 
+function tekton {
+  parse_args $*
+
+  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
+
+  local file_opt=""
+  if [ ! -z $OVERRIDE_FILE ] ; then 
+    if [ -f $OVERRIDE_FILE ]; then
+      file_opt=" -f $OVERRIDE_FILE "
+    else
+      echo "$OVERRIDE_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  local overlay_opt=""
+  if [ ! -z $OVERLAY_FILE ] ; then 
+    if [ -f $OVERLAY_FILE ]; then
+      overlay_opt=" -f $OVERLAY_FILE "
+    else
+      echo "$OVERLAY_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
+    reply="y"
+  else
+    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
+    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
+    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
+    echo ""
+    echo -e "Are you sure you want to install kpack with the following values? (y/n)"
+    read -n 1 -r reply
+    echo # move to a new line
+  fi
+  
+  if [[ $reply =~ ^[Yy]$ ]] ; then
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/release/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/release/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton --diff-changes -n default -y -f -
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/triggers/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton-triggers --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/triggers/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton-triggers --diff-changes -n default -y -f -
+  else
+    echo "Installation cancelled"
+    exit 1
+  fi
+
+  if [ "$VERIFY" == "true" ]; then
+    ${FUNCNAME[0]}.doVerify
+  fi
+}
+
+function tekton.doVerify {
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
+  source ${WORK_DIR}/tmp/verify.sh
+  tekton.verify
+}
+
+function tekton.help { 
+  echo "tekton help <OPTIONS>"
+  help-options 
+}
+
 function full {
   parse_args $*
 
@@ -317,6 +381,7 @@ function full {
   ingress
   registry
   kpack
+  tekton
 }
 
 function full.help {
@@ -390,6 +455,10 @@ then
     kpack)
       shift # past argument
       kpack "$@"
+      ;;
+    tekton)
+      shift # past argument
+      tekton "$@"
       ;;
     full)
       shift # past argument

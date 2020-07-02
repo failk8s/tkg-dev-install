@@ -1,0 +1,14 @@
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.or_op(overlay.subset({"kind":"Deployment", "metadata": {"name": "tekton-triggers-controller"}}), overlay.subset({"kind":"Deployment", "metadata": {"name": "tekton-triggers-webhook"}})), expects=2
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.all
+      - env:
+        #@overlay/match by="name",missing_ok=True
+        #@overlay/merge
+        - name: KUBERNETES_MIN_VERSION
+          value: "v1.16.3+vmware.1"

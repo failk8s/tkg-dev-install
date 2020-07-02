@@ -1,0 +1,22 @@
+#@ load("@ytt:data", "data")
+
+---
+#! TODO: Remove below condition when we know what service accounts needs to be privileged
+#@ if False: 
+#@ if data.values.privileged_clusterrole_name:
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tekton-privileged
+  namespace: tekton-pipelines
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: #@ data.values.privileged_clusterrole_name
+subjects:
+- kind: ServiceAccount
+  name: tekton-pipelines-controller
+  namespace: tekton-pipelines
+#@ end
+#@ end
+---
