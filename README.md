@@ -36,6 +36,7 @@ ytt -f k8s/values.yaml -f k8s/ingress --ignore-unknown-comments | kapp deploy -n
 ```
 
 ### Deploy an image registry
+Along with the image registry, we deploy a controller that will copy every secret in the registry namespace with a label of `pull-secret="yes"` into any new namespace and it will add it to the default serviceaccount in that namespace. See [image-puller-secret-operator](https://github.com/jorgemoralespou/image-puller-secret-operator).
 
 ```
 ytt -f k8s/values.yaml -f k8s/registry --ignore-unknown-comments | kapp deploy -n default -a registry -y -f -
