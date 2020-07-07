@@ -6,7 +6,7 @@
 #@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
 #@ t = data.values.ingress.type or assert.fail("Ingress type needs to be specified")
 
-#@overlay/match by=overlay.or_op(overlay.subset({"kind": "ServiceAccount"}), overlay.subset({"kind": "ConfigMap"}), overlay.subset({"kind": "Service"}), overlay.subset({"kind": "Role"}), overlay.subset({"kind": "RoleBinding"}), overlay.subset({"kind": "Job"}), overlay.subset({"kind": "Deployment"})), expects="1+"
+#@overlay/match by=overlay.or_op(overlay.subset({"kind": "ServiceAccount"}), overlay.subset({"kind": "ConfigMap"}), overlay.subset({"kind": "Service"}), overlay.subset({"kind": "Role"}), overlay.subset({"kind": "RoleBinding"}), overlay.subset({"kind": "Job"}), overlay.subset({"kind": "Deployment"}), overlay.subset({"kind": "ServiceAccount"}), overlay.subset({"kind": "DaemonSet"}),), expects="1+"
 ---
 metadata:
   #@overlay/match missing_ok=True
