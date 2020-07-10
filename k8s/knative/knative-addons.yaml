@@ -1,0 +1,5 @@
+#! Add TLS Certificatio manually, as we already have a wildcard
+#! https://knative.dev/docs/serving/using-a-tls-cert/#manually-adding-a-tls-certificate
+
+#! We have a valid wildcard cert at (#@ data.values.ingress.namespace / wildcard)
+

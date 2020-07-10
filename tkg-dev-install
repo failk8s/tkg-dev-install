@@ -45,6 +45,7 @@ function help {
   echo "    registry           Installs a clusterwide registry to be used by the platform"
   echo "    kpack              Installs KPack to support in cluster builds using CNB"
   echo "    tekton             Installs Tekton to support pipelines"
+  echo "    knative            Installs KNative to support scale to zero"
   echo ""
   echo "    full               Full install"
 
@@ -341,7 +342,7 @@ function tekton {
     echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
     echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
     echo ""
-    echo -e "Are you sure you want to install kpack with the following values? (y/n)"
+    echo -e "Are you sure you want to install tekton with the following values? (y/n)"
     read -n 1 -r reply
     echo # move to a new line
   fi
@@ -372,6 +373,67 @@ function tekton.help {
   help-options 
 }
 
+function knative {
+  parse_args $*
+
+  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
+
+  local file_opt=""
+  if [ ! -z $OVERRIDE_FILE ] ; then 
+    if [ -f $OVERRIDE_FILE ]; then
+      file_opt=" -f $OVERRIDE_FILE "
+    else
+      echo "$OVERRIDE_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  local overlay_opt=""
+  if [ ! -z $OVERLAY_FILE ] ; then 
+    if [ -f $OVERLAY_FILE ]; then
+      overlay_opt=" -f $OVERLAY_FILE "
+    else
+      echo "$OVERLAY_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
+    reply="y"
+  else
+    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
+    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
+    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
+    echo ""
+    echo -e "Are you sure you want to install knative with the following values? (y/n)"
+    read -n 1 -r reply
+    echo # move to a new line
+  fi
+  
+  if [[ $reply =~ ^[Yy]$ ]] ; then
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/knative/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a knative --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/knative/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a knative --diff-changes -n default -y -f -
+  else
+    echo "Installation cancelled"
+    exit 1
+  fi
+
+  if [ "$VERIFY" == "true" ]; then
+    ${FUNCNAME[0]}.doVerify
+  fi
+}
+
+function knative.doVerify {
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
+  source ${WORK_DIR}/tmp/verify.sh
+  knative.verify
+}
+
+function knative.help { 
+  echo "knative help <OPTIONS>"
+  help-options 
+}
+
 function full {
   parse_args $*
 
@@ -382,6 +444,7 @@ function full {
   registry
   kpack
   tekton
+  knative
 }
 
 function full.help {
@@ -459,6 +522,10 @@ then
     tekton)
       shift # past argument
       tekton "$@"
+      ;;
+    knative)
+      shift # past argument
+      knative "$@"
       ;;
     full)
       shift # past argument

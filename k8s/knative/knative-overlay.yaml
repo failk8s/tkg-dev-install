@@ -1,0 +1,63 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
+
+#@ d = data.values.domain or assert.fail("missing domain definition")
+#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
+#@ t = data.values.ingress.type or assert.fail("Ingress type needs to be specified")
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap"}),expects="1+"
+---
+data:
+  #@overlay/remove
+  _example:
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata": {"name": "config-domain"}})
+---
+#@yaml/text-templated-strings
+data:
+  #@overlay/match missing_ok=True
+  (@=  w @) : ""
+
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata": {"name": "config-network"}})
+---
+data:
+  #@overlay/match missing_ok=True
+  ingress.class: contour.ingress.networking.knative.dev
+  #@overlay/match missing_ok=True
+  domainTemplate: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
+  #@overlay/match missing_ok=True
+  autoTLS: Enabled
+  #@overlay/match missing_ok=True
+  httpProtocol: Enabled
+
+#! Remove CRDs that are also installed with tekton
+#@overlay/match by=overlay.subset({"kind":"CustomResourceDefinition", "metadata": {"name": "images.caching.internal.knative.dev"}}),expects=2
+#@overlay/remove
+---
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata": {"name": "config-certmanager"}})
+---
+data:
+  #@overlay/match missing_ok=True
+  issuerRef: |
+    kind: ClusterIssuer
+    name: wildcard-lets-encrypt
+
+---
+#@ if data.values.privileged_clusterrole_name:
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: knative-controller-privileged
+  namespace: knative-serving
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: #@ data.values.privileged_clusterrole_name
+subjects:
+- kind: ServiceAccount
+  name: controller
+  namespace: knative-serving
+#@ end
