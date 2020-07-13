@@ -184,8 +184,11 @@ kind: Secret
 metadata:
   name: #@ "{}-creds".format(data.values.registry.name)
   namespace: #@ data.values.registry.namespace
-  labels:
-    pull-secret: "yes"
+  annotations:
+    replicator.v1.mittwald.de/replication-allowed: "true"
+    replicator.v1.mittwald.de/replication-allowed-namespaces: "*"
+#!  labels:
+#!    pull-secret: "yes"
 type: kubernetes.io/dockerconfigjson
 data:
   .dockerconfigjson: #@ base64.encode(json.encode({"auths": {registry_name: docker_creds}}))
