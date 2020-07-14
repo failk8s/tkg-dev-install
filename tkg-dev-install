@@ -352,6 +352,8 @@ function tekton {
     ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/release/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton --diff-changes -n default -y -f -
     echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/triggers/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton-triggers --diff-changes -n default -y -f -"
     ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/triggers/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton-triggers --diff-changes -n default -y -f -
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/dashboard/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton-dashboard --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/dashboard/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton-dashboard --diff-changes -n default -y -f -
   else
     echo "Installation cancelled"
     exit 1

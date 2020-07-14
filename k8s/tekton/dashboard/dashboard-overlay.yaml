@@ -1,0 +1,47 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
+
+#@ d = data.values.domain or assert.fail("missing domain definition")
+#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: tekton-dashboard
+  namespace: tekton-pipelines
+spec:
+  rules:
+  - host: $DASHBOARD_URL
+    http:
+      paths:
+      - backend:
+          serviceName: tekton-dashboard
+          servicePort: 9097
+---
+
+#@overlay/match by=overlay.subset({"kind":"Ingress", "metadata": {"name": "tekton-dashboard"}})
+---
+spec:
+  rules:
+  #@overlay/match by=overlay.index(0)
+  - host: #@ "dashboard.{}".format(d)
+  #@overlay/match missing_ok=True
+  tls:
+  - hosts:
+    - #@ "dashboard.{}".format(d)
+    secretName: wildcard
+
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata": {"name": "webhooks-extension"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.all
+      - env:
+        #@overlay/match by="name",missing_ok=True
+        #@overlay/merge
+        - name: WEBHOOK_CALLBACK_URL
+          value: #@ "https://listener.{}".format(w)
