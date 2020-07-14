@@ -39,13 +39,12 @@ spec:
           class: #@ data.values.ingress.type
 ---
 
-#! We pre-create the secret so that it has the annotations we want
+#! We pre-create the secret so that it has the label we want
 kind: Secret
 apiVersion: v1
 metadata:
-  annotations:
-    replicator.v1.mittwald.de/replication-allowed: "true"
-    replicator.v1.mittwald.de/replication-allowed-namespaces: "*"
+  labels:
+    copy-secret: "yes"
   name: wildcard
   namespace: #@ data.values.ingress.namespace
 type: kubernetes.io/tls
