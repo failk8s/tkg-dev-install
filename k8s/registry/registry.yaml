@@ -184,9 +184,20 @@ kind: Secret
 metadata:
   name: #@ "{}-creds".format(data.values.registry.name)
   namespace: #@ data.values.registry.namespace
-  annotations:
-  labels:
-    pull-secret: "yes"
 type: kubernetes.io/dockerconfigjson
 data:
   .dockerconfigjson: #@ base64.encode(json.encode({"auths": {registry_name: docker_creds}}))
+
+---
+apiVersion: failk8s.dev/v1alpha1
+kind: SecretCopierConfig
+metadata:
+  name: #@ "{}-creds".format(data.values.registry.name)
+spec:
+  secrets:
+  - name: #@ "{}-creds".format(data.values.registry.name)
+    namespace: #@ data.values.registry.namespace
+    targetNamespaces:
+      labelSelector:
+        matchLabels:
+          developer-namespace: "yes"

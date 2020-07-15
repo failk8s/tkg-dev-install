@@ -37,20 +37,6 @@ spec:
     - http01:
         ingress:
           class: #@ data.values.ingress.type
----
-
-#! We pre-create the secret so that it has the label we want
-kind: Secret
-apiVersion: v1
-metadata:
-  labels:
-    copy-secret: "yes"
-  name: wildcard
-  namespace: #@ data.values.ingress.namespace
-type: kubernetes.io/tls
-data:
-  tls.crt: ""
-  tls.key: ""
 
 ---
 
@@ -69,3 +55,12 @@ spec:
   - #@ "*.{}".format(w)
 
 ---
+
+apiVersion: failk8s.dev/v1alpha1
+kind: SecretCopierConfig
+metadata:
+  name: registry-credentials
+spec:
+  secrets:
+  - name: wildcard
+    namespace: #@ data.values.ingress.namespace
