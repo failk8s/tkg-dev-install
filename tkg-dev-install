@@ -436,6 +436,67 @@ function knative.help {
   help-options 
 }
 
+function kubeapps {
+  parse_args $*
+
+  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
+
+  local file_opt=""
+  if [ ! -z $OVERRIDE_FILE ] ; then 
+    if [ -f $OVERRIDE_FILE ]; then
+      file_opt=" -f $OVERRIDE_FILE "
+    else
+      echo "$OVERRIDE_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  local overlay_opt=""
+  if [ ! -z $OVERLAY_FILE ] ; then 
+    if [ -f $OVERLAY_FILE ]; then
+      overlay_opt=" -f $OVERLAY_FILE "
+    else
+      echo "$OVERLAY_FILE does not exist"
+      exit 1
+    fi
+  fi
+
+  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
+    reply="y"
+  else
+    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
+    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
+    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
+    echo ""
+    echo -e "Are you sure you want to install kubeapps with the following values? (y/n)"
+    read -n 1 -r reply
+    echo # move to a new line
+  fi
+  
+  if [[ $reply =~ ^[Yy]$ ]] ; then
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kubeapps/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a knative --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kubeapps/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a knative --diff-changes -n default -y -f -
+  else
+    echo "Installation cancelled"
+    exit 1
+  fi
+
+  if [ "$VERIFY" == "true" ]; then
+    ${FUNCNAME[0]}.doVerify
+  fi
+}
+
+function kubeapps.doVerify {
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
+  source ${WORK_DIR}/tmp/verify.sh
+  kubeapps.verify
+}
+
+function kubeapps.help { 
+  echo "kubeapps help <OPTIONS>"
+  help-options 
+}
+
 function full {
   parse_args $*
 
@@ -447,6 +508,7 @@ function full {
   kpack
   tekton
   knative
+  kubeapps
 }
 
 function full.help {
@@ -528,6 +590,10 @@ then
     knative)
       shift # past argument
       knative "$@"
+      ;;
+    kubeapps)
+      shift # past argument
+      kubeapps "$@"
       ;;
     full)
       shift # past argument
