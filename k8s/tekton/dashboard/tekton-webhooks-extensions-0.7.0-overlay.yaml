@@ -1,0 +1,13 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@ a=overlay.subset({"kind":"Deployment", "metadata": {"name": "webhooks-extension"}})
+#@ b=overlay.subset({"kind":"Deployment", "metadata": {"name": "tekton-webhooks-extension-validator"}})
+#@overlay/match by=overlay.or_op(a,b),expects=2
+---
+spec:
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      securityContext:
+        runAsUser: 1
