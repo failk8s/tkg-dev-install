@@ -59,8 +59,9 @@ spec:
 apiVersion: failk8s.dev/v1alpha1
 kind: SecretCopierConfig
 metadata:
-  name: registry-credentials
+  name: wildcard
 spec:
-  secrets:
-  - name: wildcard
-    namespace: #@ data.values.ingress.namespace
+  rules:
+  - sourceSecret:
+      name: wildcard
+      namespace: #@ data.values.ingress.namespace

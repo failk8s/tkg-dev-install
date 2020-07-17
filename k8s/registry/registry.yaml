@@ -194,10 +194,26 @@ kind: SecretCopierConfig
 metadata:
   name: #@ "{}-creds".format(data.values.registry.name)
 spec:
-  secrets:
-  - name: #@ "{}-creds".format(data.values.registry.name)
-    namespace: #@ data.values.registry.namespace
+  rules:
+  - sourceSecret:
+      name: #@ "{}-creds".format(data.values.registry.name)
+      namespace: #@ data.values.registry.namespace
     targetNamespaces:
       labelSelector:
         matchLabels:
           developer-namespace: "yes"
+---
+apiVersion: failk8s.dev/v1alpha1
+kind: SecretInjectorConfig
+metadata:
+  name: #@ "{}-creds".format(data.values.registry.name)
+spec:
+  rules:
+  - sourceSecrets:
+      nameSelector:
+        matchNames:
+        - #@ "{}-creds".format(data.values.registry.name)
+    serviceAccounts:
+      nameSelector:
+        matchNames:
+        - default

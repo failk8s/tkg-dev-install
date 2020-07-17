@@ -474,8 +474,8 @@ function kubeapps {
   fi
   
   if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kubeapps/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a knative --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kubeapps/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a knative --diff-changes -n default -y -f -
+    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kubeapps/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a kubeapps --diff-changes -n default -y -f -"
+    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kubeapps/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a kubeapps --diff-changes -n default -y -f -
   else
     echo "Installation cancelled"
     exit 1
