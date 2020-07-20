@@ -1,0 +1,7 @@
+apiVersion: kapp.k14s.io/v1alpha1
+kind: Config
+diffAgainstLastAppliedFieldExclusionRules:
+- path: [metadata, annotations, "kopf.zalando.org/last-handled-configuration"]
+  resourceMatchers:
+  - apiVersionKindMatcher: {apiVersion: failk8s.dev/v1alpha1, kind: SecretCopierConfig}
+  - apiVersionKindMatcher: {apiVersion: failk8s.dev/v1alpha1, kind: SecretInjectorConfig}
