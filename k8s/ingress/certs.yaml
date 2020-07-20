@@ -58,15 +58,16 @@ spec:
 
 #! We add a certificate delegation. This might avoid us the need to copy the wildcard cert
 #! to every namespace and instead reference the wildcard cert on this namespace from any ingress
-apiVersion: contour.vmware.com/v1
+apiVersion: projectcontour.io/v1
 kind: TLSCertificateDelegation
 metadata:
   name: wildcard
   namespace: #@ data.values.ingress.namespace
 spec:
   delegations:
-  - secretName: wildcard
-    targetNamespaces: ["*"]
+    - secretName: wildcard
+      targetNamespaces:
+        - "*"
 
 ---
 
