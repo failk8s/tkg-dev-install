@@ -118,3 +118,9 @@ data:
     #   - "upstream_service_time"
     #   - "user_agent"
     #   - "x_forwarded_for"
+
+#@overlay/match by=overlay.subset({"kind":"CustomResourceDefinition"}),expects="2+"
+---
+#@overlay/remove
+#@overlay/match missing_ok=True
+status:
