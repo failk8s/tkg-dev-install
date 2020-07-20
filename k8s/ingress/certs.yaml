@@ -37,13 +37,14 @@ spec:
     - http01:
         ingress:
           class: #@ data.values.ingress.type
+
 ---
 
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: wildcard
-  namespace: contour-external
+  namespace: #@ data.values.ingress.namespace
 spec:
   secretName: wildcard
   issuerRef:
@@ -55,6 +56,20 @@ spec:
 
 ---
 
+#! We add a certificate delegation. This might avoid us the need to copy the wildcard cert
+#! to every namespace and instead reference the wildcard cert on this namespace from any ingress
+apiVersion: contour.vmware.com/v1
+kind: TLSCertificateDelegation
+metadata:
+  name: wildcard
+  namespace: #@ data.values.ingress.namespace
+spec:
+  delegations:
+  - secretName: wildcard
+    targetNamespaces: ["*"]
+
+---
+
 apiVersion: failk8s.dev/v1alpha1
 kind: SecretCopierConfig
 metadata:
@@ -63,4 +78,4 @@ spec:
   rules:
   - sourceSecret:
       name: wildcard
-      namespace: contour-external
+      namespace: #@ data.values.ingress.namespace
