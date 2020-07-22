@@ -1,0 +1,82 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: hub
+  namespace: eduk8s
+data:
+  application.yaml:
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub
+  namespace: eduk8s
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: eduk8s-hub
+  template:
+    metadata:
+      labels:
+        deployment: eduk8s-hub
+    spec:
+      containers:
+      - image: quay.io/eduk8s/eduk8s-hub:latest
+        imagePullPolicy: Always
+        name: eduk8s-hub
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+          - name: eduk8shub-config
+            mountPath: /application/config/hub/
+      volumes:
+        - name: eduk8shub-config
+          configMap:
+            name: hub
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub
+  namespace: eduk8s
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    deployment: eduk8s-hub
+  type: ClusterIP
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hub
+  namespace: eduk8s
+spec:
+  rules:
+  - host: $HUB_DASHBOARD
+    http:
+      paths:
+      - backend:
+          serviceName: hub
+          servicePort: 8080

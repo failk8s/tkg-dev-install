@@ -1,0 +1,1228 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: trainingportals.training.eduk8s.io
+spec:
+  scope: Cluster
+  group: training.eduk8s.io
+  names:
+    plural: trainingportals
+    singular: trainingportal
+    kind: TrainingPortal
+    categories:
+    - eduk8s
+    - eduk8s-training
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                system:
+                  type: object
+                  properties:
+                    profile:
+                      type: string
+                portal:
+                  type: object
+                  properties:
+                    image:
+                      type: string
+                    title:
+                      type: string
+                    logo:
+                      type: string
+                    password:
+                      type: string
+                    index:
+                      type: string
+                    capacity:
+                      type: integer
+                    initial:
+                      type: integer
+                    reserved:
+                      type: integer
+                    expires:
+                      type: string
+                      pattern: '^\d+(s|m|h)$'
+                    orphaned:
+                      type: string
+                      pattern: '^\d+(s|m|h)$'
+                    theme:
+                      type: object
+                      properties:
+                        frame:
+                          type: object
+                          properties:
+                            ancestors:
+                              type: array
+                              items:
+                                type: string
+                    ingress:
+                      type: object
+                      properties:
+                        hostname:
+                          type: string
+                        domain:
+                          type: string
+                        secret:
+                          type: string
+                        class:
+                          type: string
+                    registration:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            pattern: '^(one-step|anonymous)$'
+                          enabled:
+                            type: boolean
+                    catalog:
+                      type: object
+                      properties:
+                        visibility:
+                          type: string
+                          pattern: '^(public|private)$'
+                    credentials:
+                      type: object
+                      properties:
+                        admin:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                            password:
+                              type: string
+                        robot:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                            password:
+                              type: string
+                    clients:
+                      type: object
+                      properties:
+                        robot:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            secret:
+                              type: string
+                analytics:
+                  type: object
+                  properties:
+                    google:
+                      type: object
+                      properties:
+                        trackingId:
+                          type: string
+                workshops:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                    - name
+                    properties:
+                      name:
+                        type: string
+                      capacity:
+                        type: integer
+                      initial:
+                        type: integer
+                      reserved:
+                        type: integer
+                      expires:
+                        type: string
+                        pattern: '^\d+(s|m|h)$'
+                      orphaned:
+                        type: string
+                        pattern: '^\d+(s|m|h)$'
+                      env:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - name
+                          properties:
+                            name:
+                              type: string
+                            value:
+                              type: string
+            status:
+              type: object
+              properties:
+                kopf:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                eduk8s:
+                  type: object
+                  required:
+                  - url
+                  - credentials
+                  - clients
+                  - workshops
+                  - environments
+                  properties:
+                    url:
+                      type: string
+                    credentials:
+                      type: object
+                      required:
+                      - admin
+                      - robot
+                      properties:
+                        admin:
+                          type: object
+                          required:
+                          - username
+                          - password
+                          properties:
+                            username:
+                              type: string
+                            password:
+                              type: string
+                        robot:
+                          type: object
+                          required:
+                          - username
+                          - password
+                          properties:
+                            username:
+                              type: string
+                            password:
+                              type: string
+                    clients:
+                      type: object
+                      required:
+                      - robot
+                      properties:
+                        robot:
+                          type: object
+                          required:
+                          - id
+                          - secret
+                          properties:
+                            id:
+                              type: string
+                            secret:
+                              type: string
+                    workshops:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - name
+                        - title
+                        - description
+                        properties:
+                          name:
+                            type: string
+                          title:
+                            type: string
+                          description:
+                            type: string
+                          vendor:
+                            type: string
+                          authors:
+                            type: array
+                            items:
+                              type: string
+                          difficulty:
+                            type: string
+                          duration:
+                            type: string
+                          tags:
+                            type: array
+                            items:
+                              type: string
+                          logo:
+                            type: string
+                          url:
+                            type: string
+                          content:
+                            type: object
+                            properties:
+                              image:
+                                type: string
+                              files:
+                                type: string
+                    environments:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - name
+                        - workshop
+                        properties:
+                          name:
+                            type: string
+                          workshop:
+                            type: object
+                            required:
+                            - name
+                            properties:
+                              name:
+                                type: string
+                          capacity:
+                            type: integer
+                          initial:
+                            type: integer
+                          reserved:
+                            type: integer
+                          expires:
+                            type: string
+                            pattern: '^\d+(s|m|h)$'
+                          orphaned:
+                            type: string
+                            pattern: '^\d+(s|m|h)$'
+      additionalPrinterColumns:
+      - name: URL
+        type: string
+        priority: 0
+        description: The URL for accessing the portal.
+        jsonPath: .status.eduk8s.url
+      - name: AdminUsername
+        type: string
+        priority: 0
+        description: The username for accessing admin pages.
+        jsonPath: .status.eduk8s.credentials.admin.username
+      - name: AdminPassword
+        type: string
+        priority: 0
+        description: The password for accessing admin pages.
+        jsonPath: .status.eduk8s.credentials.admin.password
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: workshopenvironments.training.eduk8s.io
+spec:
+  scope: Cluster
+  group: training.eduk8s.io
+  names:
+    plural: workshopenvironments
+    singular: workshopenvironment
+    kind: WorkshopEnvironment
+    categories:
+    - eduk8s
+    - eduk8s-training
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+              - workshop
+              properties:
+                system:
+                  type: object
+                  properties:
+                    profile:
+                      type: string
+                workshop:
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+                request:
+                  type: object
+                  properties:
+                    token:
+                      type: string
+                    namespaces:
+                      type: array
+                      items:
+                        type: string
+                session:
+                  type: object
+                  required:
+                  properties:
+                    username:
+                      type: string
+                    password:
+                      type: string
+                    ingress:
+                      type: object
+                      properties:
+                        domain:
+                          type: string
+                        secret:
+                          type: string
+                        class:
+                          type: string
+                    env:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - name
+                        properties:
+                          name:
+                            type: string
+                          value:
+                            type: string
+                environment:
+                  type: object
+                  properties:
+                    objects:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                analytics:
+                  type: object
+                  properties:
+                    google:
+                      type: object
+                      properties:
+                        trackingId:
+                          type: string
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+              properties:
+                eduk8s:
+                  type: object
+                  required:
+                  - namespace
+                  - workshop
+                  properties:
+                    namespace:
+                      type: string
+                    workshop:
+                      type: object
+                      required:
+                      - name
+                      - spec
+                      properties:
+                        name:
+                          type: string
+                        spec:
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+      additionalPrinterColumns:
+      - name: Namespace
+        type: string
+        priority: 0
+        description: The namespace in which the workshop is deployed.
+        jsonPath: .status.eduk8s.namespace
+      - name: Workshop
+        type: string
+        priority: 0
+        description: The name of the workshop definition.
+        jsonPath: .status.eduk8s.workshop.name
+      - name: Image
+        type: string
+        priority: 0
+        description: The image used to deploy the workshop.
+        jsonPath: .status.eduk8s.workshop.spec.image
+      - name: URL
+        type: string
+        priority: 0
+        description: URL for further information on the workshop.
+        jsonPath: .status.eduk8s.workshop.spec.url
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: workshoprequests.training.eduk8s.io
+spec:
+  scope: Namespaced
+  group: training.eduk8s.io
+  names:
+    plural: workshoprequests
+    singular: workshoprequest
+    kind: WorkshopRequest
+    categories:
+    - eduk8s
+    - eduk8s-training
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+              - environment
+              properties:
+                environment:
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+                    token:
+                      type: string
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+              properties:
+                eduk8s:
+                  type: object
+                  properties:
+                    url:
+                      type: string
+                    username:
+                      type: string
+                    password:
+                      type: string
+                    session:
+                      type: object
+                      properties:
+                        kind:
+                          type: string
+                        apiVersion:
+                          type: string
+                        name:
+                          type: string
+                        uid:
+                          type: string
+      additionalPrinterColumns:
+      - name: URL
+        type: string
+        priority: 0
+        description: The URL to access the workshop.
+        jsonPath: .status.eduk8s.url
+      - name: Username
+        type: string
+        priority: 0
+        description: The username to access the workshop.
+        jsonPath: .status.eduk8s.username
+      - name: Password
+        type: string
+        priority: 0
+        description: The password to access the workshop.
+        jsonPath: .status.eduk8s.password
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: workshopsessions.training.eduk8s.io
+spec:
+  scope: Cluster
+  group: training.eduk8s.io
+  names:
+    plural: workshopsessions
+    singular: workshopsession
+    kind: WorkshopSession
+    categories:
+    - eduk8s
+    - eduk8s-training
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+              - environment
+              properties:
+                system:
+                  type: object
+                  properties:
+                    profile:
+                      type: string
+                environment:
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+                session:
+                  type: object
+                  required:
+                  - id
+                  properties:
+                    id:
+                      type: string
+                    username:
+                      type: string
+                    password:
+                      type: string
+                    ingress:
+                      type: object
+                      properties:
+                        domain:
+                          type: string
+                        secret:
+                          type: string
+                        class:
+                          type: string
+                    env:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - name
+                        properties:
+                          name:
+                            type: string
+                          value:
+                            type: string
+                request:
+                  type: object
+                  properties:
+                    namespace:
+                      type: string
+                    kind:
+                      type: string
+                    apiVersion:
+                      type: string
+                    name:
+                      type: string
+                    uid:
+                      type: string
+                analytics:
+                  type: object
+                  properties:
+                    google:
+                      type: object
+                      properties:
+                        trackingId:
+                          type: string
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+              properties:
+                eduk8s:
+                  type: object
+                  properties:
+                    url:
+                      type: string
+      additionalPrinterColumns:
+      - name: URL
+        type: string
+        priority: 0
+        description: The URL to access the workshop.
+        jsonPath: .status.eduk8s.url
+      - name: Username
+        type: string
+        priority: 0
+        description: The username to access the workshop.
+        jsonPath: .spec.session.username
+      - name: Password
+        type: string
+        priority: 0
+        description: The password to access the workshop.
+        jsonPath: .spec.session.password
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: workshops.training.eduk8s.io
+spec:
+  scope: Cluster
+  group: training.eduk8s.io
+  names:
+    plural: workshops
+    singular: workshop
+    kind: Workshop
+    categories:
+    - eduk8s
+    - eduk8s-training
+  versions:
+    - name: v1alpha1
+      served: false
+      storage: false
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+              - title
+              - description
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                vendor:
+                  type: string
+                authors:
+                  type: array
+                  items:
+                    type: string
+                difficulty:
+                  type: string
+                  pattern: '^(beginner|intermediate|advanced|extreme)$'
+                duration:
+                  type: string
+                  pattern: '^\d+(s|m|h)$'
+                tags:
+                  type: array
+                  items:
+                    type: string
+                logo:
+                  type: string
+                url:
+                  type: string
+                image:
+                  type: string
+                content:
+                  type: string
+                workshop:
+                  type: object
+                  properties:
+                    objects:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                session:
+                  type: object
+                  properties:
+                    role:
+                      type: string
+                    budget:
+                      type: string
+                    env:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - name
+                        properties:
+                          name:
+                            type: string
+                          value:
+                            type: string
+                    applications:
+                      type: object
+                      properties:
+                        terminal:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                            layout:
+                              type: string
+                        editor:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                        console:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                            vendor:
+                              type: string
+                            openshift:
+                              type: object
+                              properties:
+                                version:
+                                  type: string
+                                image:
+                                  type: string
+                        slides:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                        webdav:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                        docker:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                            memory:
+                              type: string
+                            storage:
+                              type: string
+                        registry:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                            memory:
+                              type: string
+                            storage:
+                              type: string
+                    dashboards:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - name
+                        - url
+                        properties:
+                          name:
+                            type: string
+                          url:
+                            type: string
+                    ingresses:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - name
+                        - port
+                        properties:
+                          name:
+                            type: string
+                          port:
+                            type: integer
+                    patches:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    objects:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+      additionalPrinterColumns:
+      - name: Image
+        type: string
+        priority: 0
+        description: The location of the image for the workshop.
+        jsonPath: .spec.image
+      - name: URL
+        type: string
+        priority: 0
+        description: URL for further information on the workshop.
+        jsonPath: .spec.url
+    - name: v1alpha2
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+              - title
+              - description
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                vendor:
+                  type: string
+                authors:
+                  type: array
+                  items:
+                    type: string
+                difficulty:
+                  type: string
+                  pattern: '^(beginner|intermediate|advanced|extreme)$'
+                duration:
+                  type: string
+                  pattern: '^\d+(s|m|h)$'
+                tags:
+                  type: array
+                  items:
+                    type: string
+                logo:
+                  type: string
+                url:
+                  type: string
+                content:
+                  type: object
+                  properties:
+                    image:
+                      type: string
+                    files:
+                      type: string
+                environment:
+                  type: object
+                  properties:
+                    objects:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                session:
+                  type: object
+                  properties:
+                    role:
+                      type: string
+                    budget:
+                      type: string
+                    namespaces:
+                      type: object
+                      properties:
+                        role:
+                          type: string
+                        budget:
+                          type: string
+                        limits:
+                          type: object
+                          properties:
+                            min:
+                              type: object
+                              properties:
+                                cpu:
+                                  type: string
+                                memory:
+                                  type: string
+                            max:
+                              type: object
+                              properties:
+                                cpu:
+                                  type: string
+                                memory:
+                                  type: string
+                            defaultRequest:
+                              type: object
+                              properties:
+                                cpu:
+                                  type: string
+                                memory:
+                                  type: string
+                            default:
+                              type: object
+                              properties:
+                                cpu:
+                                  type: string
+                                memory:
+                                  type: string
+                        secondary:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                            - name
+                            properties:
+                              name:
+                                type: string
+                              role:
+                                type: string
+                              budget:
+                                type: string
+                              limits:
+                                type: object
+                                properties:
+                                  min:
+                                    type: object
+                                    properties:
+                                      cpu:
+                                        type: string
+                                      memory:
+                                        type: string
+                                  max:
+                                    type: object
+                                    properties:
+                                      cpu:
+                                        type: string
+                                      memory:
+                                        type: string
+                                  defaultRequest:
+                                    type: object
+                                    properties:
+                                      cpu:
+                                        type: string
+                                      memory:
+                                        type: string
+                                  default:
+                                    type: object
+                                    properties:
+                                      cpu:
+                                        type: string
+                                      memory:
+                                        type: string
+                    security:
+                      type: object
+                      properties:
+                        policy:
+                          type: string
+                    resources:
+                      type: object
+                      properties:
+                        memory:
+                          type: string
+                        storage:
+                          type: string
+                    env:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - name
+                        properties:
+                          name:
+                            type: string
+                          value:
+                            type: string
+                    applications:
+                      type: object
+                      properties:
+                        terminal:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                            layout:
+                              type: string
+                        editor:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                        console:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                            vendor:
+                              type: string
+                            openshift:
+                              type: object
+                              properties:
+                                version:
+                                  type: string
+                                image:
+                                  type: string
+                        slides:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                        webdav:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                        docker:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                            memory:
+                              type: string
+                            storage:
+                              type: string
+                        registry:
+                          type: object
+                          required:
+                          - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                            memory:
+                              type: string
+                            storage:
+                              type: string
+                    dashboards:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - name
+                        - url
+                        properties:
+                          name:
+                            type: string
+                          url:
+                            type: string
+                    ingresses:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - name
+                        - port
+                        properties:
+                          name:
+                            type: string
+                          port:
+                            type: integer
+                    patches:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    objects:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+      additionalPrinterColumns:
+      - name: Image
+        type: string
+        priority: 0
+        description: The location of the image for the workshop.
+        jsonPath: .spec.image
+      - name: URL
+        type: string
+        priority: 0
+        description: URL for further information on the workshop.
+        jsonPath: .spec.url
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: systemprofiles.training.eduk8s.io
+spec:
+  scope: Cluster
+  group: training.eduk8s.io
+  names:
+    plural: systemprofiles
+    singular: systemprofile
+    kind: SystemProfile
+    categories:
+    - eduk8s
+    - eduk8s-training
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                ingress:
+                  type: object
+                  properties:
+                    domain:
+                      type: string
+                    secret:
+                      type: string
+                    class:
+                      type: string
+                storage:
+                  type: object
+                  properties:
+                    class:
+                      type: string
+                    group:
+                      type: integer
+                dockerd:
+                  type: object
+                  properties:
+                    mtu:
+                      type: integer
+                portal:
+                  type: object
+                  properties:
+                    image:
+                      type: string
+                    credentials:
+                      type: object
+                      properties:
+                        admin:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                            password:
+                              type: string
+                        robot:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                            password:
+                              type: string
+                    clients:
+                      type: object
+                      properties:
+                        robot:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            secret:
+                              type: string
+                environment:
+                  type: object
+                  properties:
+                    secrets:
+                      type: object
+                      properties:
+                        pull:
+                          type: array
+                          items:
+                            type: string
+                workshop:
+                  type: object
+                  properties:
+                    images:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                registry:
+                  type: object
+                  properties:
+                    host:
+                      type: string
+                    namespace:
+                      type: string
+                    secret:
+                      type: string
+                analytics:
+                  type: object
+                  properties:
+                    google:
+                      type: object
+                      properties:
+                        trackingId:
+                          type: string
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+---

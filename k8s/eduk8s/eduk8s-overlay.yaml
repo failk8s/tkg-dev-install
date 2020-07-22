@@ -1,0 +1,118 @@
+#@ load("@ytt:json", "json")
+#@ load("@ytt:base64", "base64")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
+#@ load("@ytt:overlay", "overlay")
+
+#@ d = data.values.domain or assert.fail("missing domain definition")
+#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
+
+---
+apiVersion: failk8s.dev/v1alpha1
+kind: SecretCopierConfig
+metadata:
+  name: eduk8s-wildcard
+spec:
+  rules:
+  - sourceSecret:
+      name: wildcard
+      namespace: #@ data.values.ingress.namespace
+    targetSecret:
+      name: #@ data.values.eduk8s.wildcard
+    targetNamespaces:
+      nameSelector:
+        matchNames:
+        - #@ data.values.eduk8s.namespace
+
+---
+apiVersion: failk8s.dev/v1alpha1
+kind: SecretCopierConfig
+metadata:
+  name: eduk8s-registry-creds
+spec:
+  rules:
+  - sourceSecret:
+      name: #@ "{}-creds".format(data.values.registry.name)
+      namespace: #@ data.values.registry.namespace
+    targetSecret:
+      name: #@ "eduk8s-{}-creds".format(data.values.registry.name)
+    targetNamespaces:
+      nameSelector:
+        matchNames:
+        - #@ data.values.eduk8s.namespace
+
+---
+#! Docs: https://docs.eduk8s.io/en/latest/runtime-environment/system-profile.html
+apiVersion: training.eduk8s.io/v1alpha1
+kind: SystemProfile
+metadata:
+  name: default-system-profile
+spec:
+  ingress:
+    domain: #@ data.values.wildcard_domain
+    secret: #@ data.values.eduk8s.wildcard
+    class: #@ data.values.ingress.type
+  environment:
+    secrets:
+      pull:
+      - #@ "eduk8s-{}-creds".format(data.values.registry.name)
+  storage:
+    #@ if/end data.values.privileged_clusterrole_name:
+    group: 1
+
+#@ sa=overlay.subset({"kind": "ServiceAccount", "metadata": {"name": "eduk8s"}})
+#@ deployment=overlay.subset({"kind": "Deployment", "metadata": {"name": "eduk8s-operator"}})
+#@ crb=overlay.subset({"kind": "ClusterRoleBinding", "metadata": {"name": "eduk8s-cluster-admin"}})
+#@overlay/match by=overlay.or_op(sa,deployment,crb), expects=3
+---
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.eduk8s.namespace
+
+#@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata": {"name": "eduk8s-cluster-admin"}})
+---
+subjects:
+#@overlay/match by=overlay.map_key("name")
+- kind: ServiceAccount
+  name: eduk8s
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.eduk8s.namespace
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata" : { "name": "hub"}}),expects=1
+---
+data:
+  application.yaml: #@ data.values.eduk8s.hub.config
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata" : { "name": "eduk8s-operator"}}),expects=1
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.index(0)
+      - image: #@ data.values.eduk8s.operator.image
+        #@overlay/match missing_ok=True
+        imagePullPolicy: #@ data.values.eduk8s.pullpolicy
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata" : { "name": "hub"}}),expects=1
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.index(0)
+      - image: #@ data.values.eduk8s.hub.image
+        #@overlay/match missing_ok=True
+        imagePullPolicy: #@ data.values.eduk8s.pullpolicy
+
+#@overlay/match by=overlay.subset({"kind":"Ingress", "metadata": {"name": "hub"}})
+---
+spec:
+  rules:
+  #@overlay/match by=overlay.index(0)
+  - host: #@ "hub.{}".format(d)
+  #@overlay/match missing_ok=True
+  tls:
+  - hosts:
+    - #@ "hub.{}".format(d)
+    secretName: #@ data.values.eduk8s.wildcard

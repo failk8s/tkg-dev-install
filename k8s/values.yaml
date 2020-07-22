@@ -29,3 +29,24 @@ registry:
     hashared: replicated
 kubeapps:
   namespace: kubeapps
+eduk8s:
+  namespace: eduk8s
+  pullpolicy: IfNotPresent
+  wildcard: eduk8s-wildcard
+  operator:
+    image: quay.io/eduk8s/eduk8s-operator:200714.081802.887066c
+  hub:
+    image: quay.io/eduk8s/eduk8s-hub:latest
+    config: |-
+      catalog:
+        portals:
+  #!        - name: trainin-portal-name
+  #!          url: training-portal-url
+  #!          robot:
+  #!            client_id: <robot-client-id>
+  #!            client_secret: <robot-client-id>
+  #!            username:  <robot-client-id>
+  #!            password:  <robot-client-id>
+wavefront:
+  cluster:
+  api_token:

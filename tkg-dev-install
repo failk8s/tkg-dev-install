@@ -1,7 +1,39 @@
-#!/bin/bash
+#!/usr/local/bin/bash
+#
+# Note: This script requires bash 4+
+#
 
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -uo pipefail
+
+declare -A steps
+steps['cert-manager.1.name']='cert-manager'
+steps['cert-manager.1.path']='k8s/cert-manager/'
+#
+steps["ingress.1.name"]="ingress"
+steps["ingress.1.path"]="k8s/ingress/"
+#
+steps["knative.1.name"]="knative"
+steps["knative.1.path"]="k8s/knative/"
+#
+steps["kpack.1.name"]="kpack"
+steps["kpack.1.path"]="k8s/kpack/"
+#
+steps["kubeapps.1.name"]="kubeapps"
+steps["kubeapps.1.path"]="k8s/kubeapps/"
+#
+steps["registry.1.name"]="registry"
+steps["registry.1.path"]="k8s/registry/"
+#
+steps["tekton.1.name"]="tekton-release"
+steps["tekton.1.path"]="k8s/tekton/release/"
+steps["tekton.2.name"]="tekton-triggers"
+steps["tekton.2.path"]="k8s/tekton/triggers/"
+steps["tekton.3.name"]="tekton-dashboard"
+steps["tekton.3.path"]="k8s/tekton/dashboard/"
+#
+steps["eduk8s.1.name"]="eduk8s"
+steps["eduk8s.1.path"]="k8s/eduk8s/"
 
 #install_log=$(mktemp install.log.XXXXXX)
 install_log=install.log
@@ -33,6 +65,37 @@ OVERRIDE_FILE=${OVERRIDE_FILE:-""}
 OVERLAY_FILE=${OVERLAY_FILE:-""}
 CONFIRM=${CONFIRM:-""}
 VERIFY=${VERIFY:-""}
+file_opt=""
+overlay_opt=""
+
+#
+# Args:
+#  $1: app_name 
+#  $2: path
+function install_command {
+  local app_name=$1
+  local path=$2
+  [ -z "$app_name" ] || [ -z "$path" ] && echo "Error" && exit 1
+
+  echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default -y -f -"
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default -y -f -
+}
+
+function execute_all {
+  local step_name=$1
+  for i in {1..5}; do
+    if [ ! -z "${steps[$step_name.$i.name]:-}" ]; then
+      install_command "${steps[$step_name.$i.name]:-}" "${steps[$step_name.$i.path]:-}"
+    fi
+  done
+}
+
+# for step in cert-manager ingress knative kpack kubeapps registry tekton; do
+#   execute_all $step
+# done
+# execute_all tekton
+
+# exit 1
 
 function help {
   echo "This is the ${FUNCNAME[0]} for ${SCRIPT_NAME}"
@@ -64,12 +127,13 @@ function help-options {
   echo "    -h|--help                  Shows the help for the command"
 }
 
-function ingress {
+function execute {
+  local step=$1
+  shift
   parse_args $*
 
-  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
+  [ "$SHOW_HELP" == "true" ] && help $step && return 0
 
-  local file_opt=""
   if [ ! -z $OVERRIDE_FILE ] ; then 
     if [ -f $OVERRIDE_FILE ]; then
       file_opt=" -f $OVERRIDE_FILE "
@@ -79,7 +143,6 @@ function ingress {
     fi
   fi
 
-  local overlay_opt=""
   if [ ! -z $OVERLAY_FILE ] ; then 
     if [ -f $OVERLAY_FILE ]; then
       overlay_opt=" -f $OVERLAY_FILE "
@@ -96,422 +159,38 @@ function ingress {
     echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
     echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
     echo ""
-    echo -e "Are you sure you want to install an ingress with the following values? (y/n)"
+    echo -e "Are you sure you want to install an $step with the following values? (y/n)"
     read -n 1 -r reply
     echo # move to a new line
   fi
   
   if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/ingress/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a ingress --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/ingress/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a ingress --diff-changes -n default -y -f -
+    execute_all $step
   else
     echo "Installation cancelled"
     exit 1
   fi
-
-  if [ "$VERIFY" == "true" ]; then
-    ${FUNCNAME[0]}.doVerify
-  fi
 }
 
-function ingress.doVerify {
-  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
-  source ${WORK_DIR}/tmp/verify.sh
-  ingress.verify
-}
-
-function ingress.help { 
-  echo "Create an ingress controller" 
+function help { 
+  local script=${1:-}
+  echo "Create a $script" 
   echo ""
-  echo "${SCRIPT_NAME} ingress <OPTIONS>"
+  echo "${SCRIPT_NAME} $script <OPTIONS>"
   help-options
-}
-
-function cert-manager {
-  parse_args $*
-
-  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
-
-  local file_opt=""
-  if [ ! -z $OVERRIDE_FILE ] ; then 
-    if [ -f $OVERRIDE_FILE ]; then
-      file_opt=" -f $OVERRIDE_FILE "
-    else
-      echo "$OVERRIDE_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  local overlay_opt=""
-  if [ ! -z $OVERLAY_FILE ] ; then 
-    if [ -f $OVERLAY_FILE ]; then
-      overlay_opt=" -f $OVERLAY_FILE "
-    else
-      echo "$OVERLAY_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
-    reply="y"
-  else
-    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
-    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
-    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
-    echo ""
-    echo -e "Are you sure you want to install cert-manager with the following values? (y/n)"
-    read -n 1 -r reply
-    echo # move to a new line
-  fi
-  
-  if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/cert-manager/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/cert-manager/ ${overlay_opt}  --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -
-  else
-    echo "Installation cancelled"
-    exit 1
-  fi
-
-  if [ "$VERIFY" == "true" ]; then
-    ${FUNCNAME[0]}.doVerify
-  fi
-}
-
-function cert-manager.doVerify {
-  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
-  source ${WORK_DIR}/tmp/verify.sh
-  cert-manager.verify
-}
-
-function cert-manager.help { 
-  echo "cert-manager help <OPTIONS>"
-  help-options 
-}
-
-function registry {
-  parse_args $*
-
-  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
-
-  local file_opt=""
-  if [ ! -z $OVERRIDE_FILE ] ; then 
-    if [ -f $OVERRIDE_FILE ]; then
-      file_opt=" -f $OVERRIDE_FILE "
-    else
-      echo "$OVERRIDE_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  local overlay_opt=""
-  if [ ! -z $OVERLAY_FILE ] ; then 
-    if [ -f $OVERLAY_FILE ]; then
-      overlay_opt=" -f $OVERLAY_FILE "
-    else
-      echo "$OVERLAY_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
-    reply="y"
-  else
-    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
-    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
-    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
-    echo ""
-    echo -e "Are you sure you want to install a registry with the following values? (y/n)"
-    read -n 1 -r reply
-    echo # move to a new line
-  fi
-  
-  if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/registry/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a registry --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/registry/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a registry --diff-changes -n default -y -f -
-  else
-    echo "Installation cancelled"
-    exit 1
-  fi
-
-  if [ "$VERIFY" == "true" ]; then
-    ${FUNCNAME[0]}.doVerify
-  fi
-}
-
-function registry.doVerify {
-  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
-  source ${WORK_DIR}/tmp/verify.sh
-  registry.verify
-}
-
-function registry.help { 
-  echo "registry help <OPTIONS>"
-  help-options 
-}
-
-function kpack {
-  parse_args $*
-
-  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
-
-  local file_opt=""
-  if [ ! -z $OVERRIDE_FILE ] ; then 
-    if [ -f $OVERRIDE_FILE ]; then
-      file_opt=" -f $OVERRIDE_FILE "
-    else
-      echo "$OVERRIDE_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  local overlay_opt=""
-  if [ ! -z $OVERLAY_FILE ] ; then 
-    if [ -f $OVERLAY_FILE ]; then
-      overlay_opt=" -f $OVERLAY_FILE "
-    else
-      echo "$OVERLAY_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
-    reply="y"
-  else
-    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
-    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
-    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
-    echo ""
-    echo -e "Are you sure you want to install kpack with the following values? (y/n)"
-    read -n 1 -r reply
-    echo # move to a new line
-  fi
-  
-  if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kpack/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a kpack --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kpack/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a kpack --diff-changes -n default -y -f -
-  else
-    echo "Installation cancelled"
-    exit 1
-  fi
-
-  if [ "$VERIFY" == "true" ]; then
-    ${FUNCNAME[0]}.doVerify
-  fi
-}
-
-function kpack.doVerify {
-  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
-  source ${WORK_DIR}/tmp/verify.sh
-  kpack.verify
-}
-
-function kpack.help { 
-  echo "kpack help <OPTIONS>"
-  help-options 
-}
-
-function tekton {
-  parse_args $*
-
-  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
-
-  local file_opt=""
-  if [ ! -z $OVERRIDE_FILE ] ; then 
-    if [ -f $OVERRIDE_FILE ]; then
-      file_opt=" -f $OVERRIDE_FILE "
-    else
-      echo "$OVERRIDE_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  local overlay_opt=""
-  if [ ! -z $OVERLAY_FILE ] ; then 
-    if [ -f $OVERLAY_FILE ]; then
-      overlay_opt=" -f $OVERLAY_FILE "
-    else
-      echo "$OVERLAY_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
-    reply="y"
-  else
-    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
-    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
-    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
-    echo ""
-    echo -e "Are you sure you want to install tekton with the following values? (y/n)"
-    read -n 1 -r reply
-    echo # move to a new line
-  fi
-  
-  if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/release/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/release/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton --diff-changes -n default -y -f -
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/triggers/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton-triggers --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/triggers/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton-triggers --diff-changes -n default -y -f -
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/dashboard/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton-dashboard --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/tekton/dashboard/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a tekton-dashboard --diff-changes -n default -y -f -
-  else
-    echo "Installation cancelled"
-    exit 1
-  fi
-
-  if [ "$VERIFY" == "true" ]; then
-    ${FUNCNAME[0]}.doVerify
-  fi
-}
-
-function tekton.doVerify {
-  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
-  source ${WORK_DIR}/tmp/verify.sh
-  tekton.verify
-}
-
-function tekton.help { 
-  echo "tekton help <OPTIONS>"
-  help-options 
-}
-
-function knative {
-  parse_args $*
-
-  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
-
-  local file_opt=""
-  if [ ! -z $OVERRIDE_FILE ] ; then 
-    if [ -f $OVERRIDE_FILE ]; then
-      file_opt=" -f $OVERRIDE_FILE "
-    else
-      echo "$OVERRIDE_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  local overlay_opt=""
-  if [ ! -z $OVERLAY_FILE ] ; then 
-    if [ -f $OVERLAY_FILE ]; then
-      overlay_opt=" -f $OVERLAY_FILE "
-    else
-      echo "$OVERLAY_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
-    reply="y"
-  else
-    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
-    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
-    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
-    echo ""
-    echo -e "Are you sure you want to install knative with the following values? (y/n)"
-    read -n 1 -r reply
-    echo # move to a new line
-  fi
-  
-  if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/knative/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a knative --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/knative/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a knative --diff-changes -n default -y -f -
-  else
-    echo "Installation cancelled"
-    exit 1
-  fi
-
-  if [ "$VERIFY" == "true" ]; then
-    ${FUNCNAME[0]}.doVerify
-  fi
-}
-
-function knative.doVerify {
-  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
-  source ${WORK_DIR}/tmp/verify.sh
-  knative.verify
-}
-
-function knative.help { 
-  echo "knative help <OPTIONS>"
-  help-options 
-}
-
-function kubeapps {
-  parse_args $*
-
-  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
-
-  local file_opt=""
-  if [ ! -z $OVERRIDE_FILE ] ; then 
-    if [ -f $OVERRIDE_FILE ]; then
-      file_opt=" -f $OVERRIDE_FILE "
-    else
-      echo "$OVERRIDE_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  local overlay_opt=""
-  if [ ! -z $OVERLAY_FILE ] ; then 
-    if [ -f $OVERLAY_FILE ]; then
-      overlay_opt=" -f $OVERLAY_FILE "
-    else
-      echo "$OVERLAY_FILE does not exist"
-      exit 1
-    fi
-  fi
-
-  if [ -n "$CONFIRM" ] && [ "$CONFIRM" == "true" ] ; then
-    reply="y"
-  else
-    echo -e "Cluster: ${RED}${CLUSTER}${NC}"
-    echo -e "Configuration: ${RED}${OVERRIDE_FILE}${NC}"
-    echo -e "Overlay: ${RED}${OVERLAY_FILE}${NC}"
-    echo ""
-    echo -e "Are you sure you want to install kubeapps with the following values? (y/n)"
-    read -n 1 -r reply
-    echo # move to a new line
-  fi
-  
-  if [[ $reply =~ ^[Yy]$ ]] ; then
-    echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kubeapps/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a kubeapps --diff-changes -n default -y -f -"
-    ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/kubeapps/ ${overlay_opt} --ignore-unknown-comments | kapp deploy -a kubeapps --diff-changes -n default -y -f -
-  else
-    echo "Installation cancelled"
-    exit 1
-  fi
-
-  if [ "$VERIFY" == "true" ]; then
-    ${FUNCNAME[0]}.doVerify
-  fi
-}
-
-function kubeapps.doVerify {
-  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/k8s/verify.sh  --file-mark '**/*.sh:type=text-template' --output-directory ${WORK_DIR}/tmp
-  source ${WORK_DIR}/tmp/verify.sh
-  kubeapps.verify
-}
-
-function kubeapps.help { 
-  echo "kubeapps help <OPTIONS>"
-  help-options 
 }
 
 function full {
   parse_args $*
 
-  [ "$SHOW_HELP" == "true" ] && ${FUNCNAME[0]}.help && return 0
+  [ "$SHOW_HELP" == "true" ] && help.all && return 0
 
-  cert-manager
-  ingress
-  registry
-  kpack
-  tekton
-  knative
-  kubeapps
+  for step in cert-manager ingress registry kpack tekton knative kubeapps wavefront ; do
+    execute $step
+  done
 }
 
-function full.help {
+function help.all {
   echo "Installs all neccesary additional components into an existing cluster"
   help-options   
 } 
@@ -569,40 +248,48 @@ then
   case $key in
     ingress)
       shift # past argument
-      ingress "$@"
+      execute ingress "$@"
       ;;
     cert-manager)
       shift # past argument
-      cert-manager "$@"
+      execute cert-manager "$@"
       ;;
     registry)
       shift # past argument
-      registry "$@"
+      execute registry "$@"
       ;;
     kpack)
       shift # past argument
-      kpack "$@"
+      execute kpack "$@"
       ;;
     tekton)
       shift # past argument
-      tekton "$@"
+      execute tekton "$@"
       ;;
     knative)
       shift # past argument
-      knative "$@"
+      execute knative "$@"
       ;;
     kubeapps)
       shift # past argument
-      kubeapps "$@"
+      execute kubeapps "$@"
+      ;;
+    eduk8s)
+      shift # past argument
+      execute eduk8s "$@"
+      ;;
+    wavefront)
+      shift # past argument
+      execute wavefront "$@"
       ;;
     full)
       shift # past argument
       full "$@"
       ;;
     *)
-      help
+      help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full"
       ;;
   esac
 else
-  help
+  help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full"
 fi
