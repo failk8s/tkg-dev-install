@@ -59,6 +59,11 @@ spec:
   storage:
     #@ if/end data.values.privileged_clusterrole_name:
     group: 1
+  #@ if data.values.eduk8s.google_analytics:
+  analytics:
+    google:
+      trackingId: #@ data.values.eduk8s.google_analytics
+  #@ end
 
 #@ sa=overlay.subset({"kind": "ServiceAccount", "metadata": {"name": "eduk8s"}})
 #@ deployment=overlay.subset({"kind": "Deployment", "metadata": {"name": "eduk8s-operator"}})

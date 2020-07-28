@@ -35,6 +35,7 @@ eduk8s:
   wildcard: eduk8s-wildcard
   operator:
     image: quay.io/eduk8s/eduk8s-operator:200714.081802.887066c
+  google_analytics:
   hub:
     image: quay.io/eduk8s/eduk8s-hub:latest
     config: |-
