@@ -6,5 +6,5 @@ privileged_clusterrole_name: vmware-system-tmc-psp-privileged
 aws_access_key_id: ABCDEFGHIJKLM
 aws_secret_access_key: abABC1ABA1B1B2c/ABc3ABc/AbcdEFgHIJkl2abC
 wavefront:
-  cluster: vmware
+  cluster: https://vmware.wavefront.com
   api_token:  API_TOKEN

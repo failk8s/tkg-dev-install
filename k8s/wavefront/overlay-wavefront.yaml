@@ -8,7 +8,7 @@
 #@ a = data.values.wavefront.api_token or assert.fail("missing wavefront api token definition")
 
 #! Values used inside this template
-#@ cluster = "https://{}.wavefront.com/api/".format(data.values.wavefront.cluster)
+#@ wavefront_endpoint = "{}/api/".format(data.values.wavefront.cluster)
 #@ token = data.values.wavefront.api_token
 
 #@ if data.values.privileged_clusterrole_name:
@@ -69,7 +69,7 @@ spec:
           env:
           #@overlay/match by="name"
           - name: WAVEFRONT_URL
-            value: #@ cluster
+            value: #@ wavefront_endpoint
           #@overlay/match by="name"
           - name: WAVEFRONT_TOKEN
             value: #@ token
