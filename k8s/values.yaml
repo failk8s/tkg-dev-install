@@ -49,5 +49,5 @@ eduk8s:
   #!            username:  <robot-client-id>
   #!            password:  <robot-client-id>
 wavefront:
-  cluster:
+  uri:
   api_token:

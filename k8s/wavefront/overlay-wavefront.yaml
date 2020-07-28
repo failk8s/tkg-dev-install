@@ -4,11 +4,11 @@
 
 #! Validation for required parameters
 #@ d = data.values.domain or assert.fail("missing domain definition")
-#@ c = data.values.wavefront.cluster or assert.fail("missing wavefront cluster definition")
+#@ c = data.values.wavefront.uri or assert.fail("missing wavefront uri definition")
 #@ a = data.values.wavefront.api_token or assert.fail("missing wavefront api token definition")
 
 #! Values used inside this template
-#@ wavefront_endpoint = "{}/api/".format(data.values.wavefront.cluster)
+#@ wavefront_endpoint = "{}/api/".format(c)
 #@ token = data.values.wavefront.api_token
 
 #@ if data.values.privileged_clusterrole_name:
