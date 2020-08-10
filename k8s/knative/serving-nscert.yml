@@ -17,7 +17,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: knative-serving-namespace-wildcard-certs
   labels:
-    serving.knative.dev/release: "v0.15.0"
+    serving.knative.dev/release: "v0.16.0"
     serving.knative.dev/controller: "true"
     networking.knative.dev/wildcard-certificate-provider: nscert
 rules:
@@ -46,7 +46,7 @@ metadata:
   name: networking-ns-cert
   namespace: knative-serving
   labels:
-    serving.knative.dev/release: "v0.15.0"
+    serving.knative.dev/release: "v0.16.0"
     networking.knative.dev/wildcard-certificate-provider: nscert
 spec:
   selector:
@@ -58,14 +58,14 @@ spec:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
       labels:
         app: networking-ns-cert
-        serving.knative.dev/release: "v0.15.0"
+        serving.knative.dev/release: "v0.16.0"
     spec:
       serviceAccountName: controller
       containers:
       - name: networking-nscert
         # This is the Go import path for the binary that is containerized
         # and substituted here.
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/networking/nscert@sha256:972e1e40ecf8e1fff1b251f7487e0f3537c31466311eb14f52fd757113b17d0f
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/networking/nscert@sha256:3e46d8a9bfcf76bcfd97711bcb63e7af4f44cb72c19d3e0ae4789957776e1032
         resources:
           requests:
             cpu: 30m
@@ -98,7 +98,7 @@ kind: Service
 metadata:
   labels:
     app: networking-ns-cert
-    serving.knative.dev/release: "v0.15.0"
+    serving.knative.dev/release: "v0.16.0"
     networking.knative.dev/wildcard-certificate-provider: nscert
   name: networking-ns-cert
   namespace: knative-serving

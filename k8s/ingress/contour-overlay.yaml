@@ -24,14 +24,6 @@ subjects:
   name: contour-certgen
   namespace: #@ data.values.ingress.namespace
 
-#@overlay/match by=overlay.subset({"kind":"RoleBinding", "metadata": {"name": "contour-leaderelection"}})
----
-subjects:
-#@overlay/match by=overlay.map_key("name")
-- kind: ServiceAccount
-  name: contour
-  namespace: #@ data.values.ingress.namespace
-
 #@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata": {"name": "contour"}})
 ---
 subjects:
