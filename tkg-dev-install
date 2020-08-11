@@ -290,9 +290,9 @@ then
       full "$@"
       ;;
     *)
-      help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full"
+      help "cert-manager|ingress|knative|kpack|kubeapps|registry|tekton|eduk8s|wavefront|full"
       ;;
   esac
 else
-  help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full"
+  help "cert-manager|ingress|knative|kpack|kubeapps|registry|tekton|eduk8s|wavefront|full"
 fi
