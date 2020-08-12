@@ -183,12 +183,22 @@ function help {
   help-options
 }
 
-function full {
+function full-dev {
   parse_args $*
 
   [ "$SHOW_HELP" == "true" ] && help.all && return 0
 
   for step in cert-manager ingress registry kpack tekton knative kubeapps wavefront ; do
+    execute $step
+  done
+}
+
+function full-eduk8s {
+  parse_args $*
+
+  [ "$SHOW_HELP" == "true" ] && help.all && return 0
+
+  for step in cert-manager ingress registry kpack tekton knative kubeapps wavefront eduk8s ; do
     execute $step
   done
 }
@@ -285,14 +295,18 @@ then
       shift # past argument
       execute wavefront "$@"
       ;;
-    full)
+    full-dev)
       shift # past argument
-      full "$@"
+      full-dev "$@"
+      ;;
+    full-eduk8s)
+      shift # past argument
+      full-eduk8s "$@"
       ;;
     *)
-      help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full"
+      help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full-dev|full-eduk8s"
       ;;
   esac
 else
-  help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full"
+  help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full-dev|full-eduk8s"
 fi
