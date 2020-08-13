@@ -22,11 +22,11 @@ __NOTE__: Before you start installation, you need to verify you're providing the
   
 ### Deploy cert-manager to manage SSL certificates for you
 ```
-ytt -f k8s/values.yaml -f k8s/cert-manager.yaml --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -
+ytt -f k8s/values.yaml -f k8s/cert-manager --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -
 ```
 
 ### Create your ingress controller
-You need to have 2 hosted zones in AWS Route53 for the LB that the ingress controller will create.
+You need to have 2 records in AWS Route53, for your hosted zone, the LB that the ingress controller will create.
   * *.<DOMAIN> 
   * *.apps.<DOMAIN>
 Luckily, we have you covered. We will deploy external-dns so that the ingress will create this DNS records for you. Also, we will deploy an ingress controller that will handle your access to your wildcard domains.
@@ -67,7 +67,7 @@ domain: failk8s.dev
 wildcard_domain: apps.failk8s.dev
 ```
 
-__NOTE__: There is an [example override file](override.yml.example) for convenience. Just rename it.
+__NOTE__: There is an [example override file](override.example.yml) for convenience. Just rename it.
 __NOTE__: You can collapse all values into a single file and use it.
 
 Use it in your ytt files after the values file. e.g:
@@ -136,3 +136,35 @@ For external-dns to work, you need to:
 ```
 
 After this, we have 2 new A records in the configured Hosted Zone with the provided domain and wildcard domains.
+
+## Sample Workshop
+
+Deploy a sample workshop, [Lab - Markdown Sample](https://github.com/eduk8s/lab-markdown-sample).
+
+## Access Hub
+
+Retrieve the hub URL and open in a browser.
+
+```
+kubectl get ingress -n eduk8s
+```
+
+## Teardown
+
+Remove all components.
+
+```
+kapp delete -a tekton-dashboard -y -n default
+kapp delete -a tekton-release -y -n default
+kapp delete -a tekton-triggers -y -n default
+kapp delete -a kpack -y -n default
+kapp delete -a registry -y -n default
+kapp delete -a ingress -y -n default
+kapp delete -a cert-manager -y -n default
+kapp delete -a knative -y -n default
+kapp delete -a kubeapps -y -n default
+kapp delete -a wavefront -y -n default
+kapp delete -a eduk8s -y -n default
+```
+
+Also, You need to cleanup the records added to your Route53 hosted zone.
