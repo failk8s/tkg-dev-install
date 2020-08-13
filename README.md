@@ -221,18 +221,11 @@ Refer to [eduk8s docs](https://docs.eduk8s.io) for info on how to deploy a works
 
 ## Teardown
 
-Remove all components.
+To remove all components (or any componen) just provide a **-u** or **--uninstall** flag to the installer. In this case, no overide or confirm flags are needed.
 
+e.g:
 ```
-kapp delete -a eduk8s -y -n default
-kapp delete -a wavefront -y -n default
-kapp delete -a kubeapps -y -n default
-kapp delete -a knative -y -n default
-kapp delete -a tekton -y -n default
-kapp delete -a kpack -y -n default
-kapp delete -a registry -y -n default
-kapp delete -a ingress -y -n default
-kapp delete -a cert-manager -y -n default
+./tkg-dev-install full-eduk8s -u
 ```
 
-Also, You need to cleanup the records added to your Route53 hosted zone.
+__NOTE__: If you delete everything, you might need to cleanup the records added to your Route53 hosted zone.

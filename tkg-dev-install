@@ -40,6 +40,9 @@ steps["eduk8s.1.path"]="k8s/eduk8s/"
 steps["wavefront.1.name"]="wavefront"
 steps["wavefront.1.path"]="k8s/wavefront/"
 
+FULL_DEV_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront"
+FULL_EDUK8S_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront eduk8s"
+
 #install_log=$(mktemp install.log.XXXXXX)
 install_log=install.log
 
@@ -70,6 +73,7 @@ OVERRIDE_FILE=${OVERRIDE_FILE:-""}
 OVERLAY_FILE=${OVERLAY_FILE:-""}
 CONFIRM=${CONFIRM:-""}
 VERIFY=${VERIFY:-""}
+UNINSTALL=${VERIFY:-""}
 file_opt=""
 overlay_opt=""
 
@@ -86,11 +90,33 @@ function install_command {
   ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/config -f ${WORK_DIR}/$path/downstream ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default -y -f -
 }
 
-function execute_all {
+#
+# Args:
+#  $1: app_name 
+#  $2: path
+function uninstall_command {
+  local app_name=$1
+  local path=$2
+  [ -z "$app_name" ] || [ -z "$path" ] && echo "Error" && exit 1
+
+  echo "kapp delete -a ${app_name} -n default -y"
+  kapp delete -a ${app_name} -n default -y
+}
+
+function install_steps {
   local step_name=$1
   for i in {1..5}; do
     if [ ! -z "${steps[$step_name.$i.name]:-}" ]; then
       install_command "${steps[$step_name.$i.name]:-}" "${steps[$step_name.$i.path]:-}"
+    fi
+  done
+}
+
+function uninstall_steps {
+  local step_name=$1
+  for i in {5..1}; do
+    if [ ! -z "${steps[$step_name.$i.name]:-}" ]; then
+      uninstall_command "${steps[$step_name.$i.name]:-}" "${steps[$step_name.$i.path]:-}"
     fi
   done
 }
@@ -114,8 +140,12 @@ function help {
   echo "    kpack              Installs KPack to support in cluster builds using CNB"
   echo "    tekton             Installs Tekton to support pipelines"
   echo "    knative            Installs KNative to support scale to zero"
+  echo "    kubeapps           Installs Application Catalog capabiliites"
+  echo "    wavefront          Installs Observability integration with Wavefront"
+  echo "    eduk8s             Installs eduk8s platform"
   echo ""
-  echo "    full               Full install"
+  echo "    full-dev           Full Developer install (everything except eduk8s)"
+  echo "    full-eduk8s        Full Eduk8s install (everything)"
 
   help-options
 }
@@ -129,6 +159,7 @@ function help-options {
   echo "    -v|--verify                Verifies the result of the process by executing a verification step"
   echo "    -o=<FILE>|--overlay=<FILE>"
   echo "    -o|--overlay <FILE>        Provides an overlay file, to alter install scripts"
+  echo "    -u|--uninstall             Uninstalls a component"
   echo "    -h|--help                  Shows the help for the command"
 }
 
@@ -136,8 +167,16 @@ function execute {
   local step=$1
   shift
   parse_args $*
+  local uninstall="no"
 
   [ "$SHOW_HELP" == "true" ] && help $step && return 0
+
+  if [ ! -z $UNINSTALL ] ; then
+    OVERRIDE_FILE=""
+    OVERLAY_FILE=""
+    CONFIRM="true"
+    uninstall="yes"
+  fi 
 
   if [ ! -z $OVERRIDE_FILE ] ; then 
     if [ -f $OVERRIDE_FILE ]; then
@@ -170,7 +209,11 @@ function execute {
   fi
   
   if [[ $reply =~ ^[Yy]$ ]] ; then
-    execute_all $step
+    if [ ! -z $UNINSTALL ] ; then
+      uninstall_steps $step
+    else
+      install_steps $step
+    fi
   else
     echo "Installation cancelled"
     exit 1
@@ -185,22 +228,22 @@ function help {
   help-options
 }
 
-function full-dev {
+function full {
+  local _list=${FULL_DEV_STEPS}
+  if [ "$1" == "eduk8s" ]; then
+    _list=${FULL_EDUK8S_STEPS}
+  fi
+  shift # Remove type of full install
   parse_args $*
 
   [ "$SHOW_HELP" == "true" ] && help.all && return 0
 
-  for step in cert-manager ingress registry kpack tekton knative kubeapps wavefront ; do
-    execute $step
-  done
-}
+  # Reverse order
+  if [ ! -z $UNINSTALL ] ; then
+    _list=$(echo "$_list" | awk '{ for (i=NF; i>1; i--) printf("%s ",$i); print $1; }')
+  fi 
 
-function full-eduk8s {
-  parse_args $*
-
-  [ "$SHOW_HELP" == "true" ] && help.all && return 0
-
-  for step in cert-manager ingress registry kpack tekton knative kubeapps wavefront eduk8s ; do
+  for step in $_list ; do
     execute $step
   done
 }
@@ -243,6 +286,10 @@ function parse_args {
         ;;
       -c|--confirm)
         CONFIRM="true"
+        shift # past argument
+        ;;
+      -u|--uninstall)
+        UNINSTALL="true"
         shift # past argument
         ;;
       *)
@@ -299,11 +346,11 @@ then
       ;;
     full-dev)
       shift # past argument
-      full-dev "$@"
+      full dev "$@"
       ;;
     full-eduk8s)
       shift # past argument
-      full-eduk8s "$@"
+      full eduk8s "$@"
       ;;
     *)
       help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full-dev|full-eduk8s"
