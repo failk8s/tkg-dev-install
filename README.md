@@ -21,23 +21,41 @@ You will need an AWS IAM user/serviceaccount credentials to configure cert-manag
 __NOTE__: Before you start installation, you need to verify you're providing the required values in [values.yaml](.k8s/values.yaml) or that you use an override file as explained later.
   
 ### Deploy cert-manager to manage SSL certificates for you
+
 ```
-ytt -f k8s/values.yaml -f k8s/cert-manager.yaml --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -
+./tkg-dev-install cert-manager [OPTIONS]
+```
+
+This will execute under the hood:
+```
+ytt -f k8s/values.yaml -f k8s/cert-manager --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -
 ```
 
 ### Create your ingress controller
-You need to have 2 hosted zones in AWS Route53 for the LB that the ingress controller will create.
+You need to have 2 records in AWS Route53, for your hosted zone, the LB that the ingress controller will create.
   * *.<DOMAIN> 
   * *.apps.<DOMAIN>
 Luckily, we have you covered. We will deploy external-dns so that the ingress will create this DNS records for you. Also, we will deploy an ingress controller that will handle your access to your wildcard domains.
 
 ```
+./tkg-dev-install ingress [OPTIONS]
+```
+
+This will execute under the hood:
+```
 ytt -f k8s/values.yaml -f k8s/ingress --ignore-unknown-comments | kapp deploy -n default -a ingress -y -f -
 ```
 
-### Deploy an image registry
-Along with the image registry, we deploy a controller that will copy every secret in the registry namespace with a label of `pull-secret="yes"` into any new namespace and it will add it to the default serviceaccount in that namespace. See [image-puller-secret-operator](https://github.com/jorgemoralespou/image-puller-secret-operator).
+__NOTE__: We will use the [failk8s-operator](https://github.com/failk8s/failk8s-operator) to copy the wildcard certificate into every namespace so that it can be used to secure any route on any namespace.
 
+### Deploy an image registry
+Along with the image registry, we deploy a controller that will copy the registry credentials secret in every namespace and add an imagePullSecret to the `default` ServiceAccount on every namespace. See [failk8s-operator](https://github.com/failk8s/failk8s-operator).
+
+```
+./tkg-dev-install registry [OPTIONS]
+```
+
+This will execute under the hood:
 ```
 ytt -f k8s/values.yaml -f k8s/registry --ignore-unknown-comments | kapp deploy -n default -a registry -y -f -
 ```
@@ -45,14 +63,83 @@ ytt -f k8s/values.yaml -f k8s/registry --ignore-unknown-comments | kapp deploy -
 ### Deploy image building capabilities
 
 ```
+./tkg-dev-install kpack [OPTIONS]
+```
+
+This will execute under the hood:
+```
 ytt -f k8s/values.yaml -f k8s/kpack --ignore-unknown-comments | kapp deploy -n default -a kpack -y -f -
 ```
 
 ### Deploy CI/CD/Pipelines building capabilities
 
 ```
+./tkg-dev-install tekton [OPTIONS]
+```
+
+This will execute under the hood:
+```
 ytt -f k8s/values.yaml -f k8s/tekton/release --ignore-unknown-comments | kapp deploy -n default -a tekton -y -f -
 ytt -f k8s/values.yaml -f k8s/tekton/triggers --ignore-unknown-comments | kapp deploy -n default -a tekton-triggers -y -f -
+```
+
+### Deploy Scale to Zero capabilities
+
+```
+./tkg-dev-install knative [OPTIONS]
+```
+
+This will execute under the hood:
+```
+ytt -f k8s/values.yaml -f k8s/knative --ignore-unknown-comments | kapp deploy -n default -a knative -y -f -
+```
+
+### Deploy Application Catalog capabilities
+
+```
+./tkg-dev-install kubeapps [OPTIONS]
+```
+
+This will execute under the hood:
+```
+ytt -f k8s/values.yaml -f k8s/kubeapps --ignore-unknown-comments | kapp deploy -n default -a kubeapps -y -f -
+```
+
+### Deploy Observability Capabilities
+
+```
+./tkg-dev-install wavefront [OPTIONS]
+```
+
+This will execute under the hood:
+```
+ytt -f k8s/values.yaml -f k8s/wavefront --ignore-unknown-comments | kapp deploy -n default -a wavefront -y -f -
+```
+
+### Deploy Eduk8s capabilities
+
+```
+./tkg-dev-install eduk8s [OPTIONS]
+```
+
+This will execute under the hood:
+```
+ytt -f k8s/values.yaml -f k8s/eduk8s --ignore-unknown-comments | kapp deploy -n default -a eduk8s -y -f -
+```
+
+## FULL INSTALLS
+There are two complete installations that this installer targets:
+
+- Development environments
+- Eduk8s environment
+
+`Eduk8s environment` will contain everything that this installer provides, and `Development environment` will provide the same except for `eduk8s` capabilities.
+
+Choose between one of the following commands to install them.
+
+```
+./tkg-dev-install full-dev -c -f <override-file>
+./tkg-dev-install full-eduk8s -c -f <override-file>
 ```
 
 ## Override information
@@ -67,19 +154,13 @@ domain: failk8s.dev
 wildcard_domain: apps.failk8s.dev
 ```
 
-__NOTE__: There is an [example override file](override.yml.example) for convenience. Just rename it.
+__NOTE__: There is an [example override file](override.example.yml) for convenience. Just rename it and adapt your values.
 __NOTE__: You can collapse all values into a single file and use it.
 
-Use it in your ytt files after the values file. e.g:
+Use it with the `-f` flag:
 
 ```
-export OVERRIDE=override.yaml
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/cert-manager --ignore-unknown-comments | kapp deploy -n default -a cert-manager -y -f -
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/ingress --ignore-unknown-comments | kapp deploy -n default -a ingress -y -f -
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/registry --ignore-unknown-comments | kapp deploy -n default -a registry -y -f -
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/kpack --ignore-unknown-comments | kapp deploy -n default -a kpack -y -f -
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/tekton/release --ignore-unknown-comments | kapp deploy -n default -a tekton -y -f -
-ytt -f k8s/values.yaml -f ${OVERRIDE} -f k8s/tekton/triggers --ignore-unknown-comments | kapp deploy -n default -a tekton-triggers -y -f -
+./tkg-dev-install <OPTION> -c -f <override-file>
 ```
 
 ### Install without full AWS integration
@@ -90,8 +171,6 @@ In this scenario, you will not use cert-manager to create the wildcard certifica
 * Deploy eduks8-controller following the steps above.
 * (OPTIONAL)
   * Deploy an image-registry (You will need to generate a certificate for the image registry yourself)
-
-
 
 
 ## NOTES
@@ -136,3 +215,26 @@ For external-dns to work, you need to:
 ```
 
 After this, we have 2 new A records in the configured Hosted Zone with the provided domain and wildcard domains.
+
+## Eduk8s usage
+Refer to [eduk8s docs](https://docs.eduk8s.io) for info on how to deploy a workshop.
+
+## Teardown
+
+Remove all components.
+
+```
+kapp delete -a eduk8s -y -n default
+kapp delete -a wavefront -y -n default
+kapp delete -a kubeapps -y -n default
+kapp delete -a knative -y -n default
+kapp delete -a tekton-dashboard -y -n default
+kapp delete -a tekton-triggers -y -n default
+kapp delete -a tekton-release -y -n default
+kapp delete -a kpack -y -n default
+kapp delete -a registry -y -n default
+kapp delete -a ingress -y -n default
+kapp delete -a cert-manager -y -n default
+```
+
+Also, You need to cleanup the records added to your Route53 hosted zone.
