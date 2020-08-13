@@ -25,12 +25,14 @@ steps["kubeapps.1.path"]="k8s/kubeapps/"
 steps["registry.1.name"]="registry"
 steps["registry.1.path"]="k8s/registry/"
 #
-steps["tekton.1.name"]="tekton-release"
-steps["tekton.1.path"]="k8s/tekton/release/"
-steps["tekton.2.name"]="tekton-triggers"
-steps["tekton.2.path"]="k8s/tekton/triggers/"
-steps["tekton.3.name"]="tekton-dashboard"
-steps["tekton.3.path"]="k8s/tekton/dashboard/"
+steps["tekton.1.name"]="tekton"
+steps["tekton.1.path"]="k8s/tekton/"
+#steps["tekton.1.name"]="tekton-release"
+#steps["tekton.1.path"]="k8s/tekton/release/"
+#steps["tekton.2.name"]="tekton-triggers"
+#steps["tekton.2.path"]="k8s/tekton/triggers/"
+#steps["tekton.3.name"]="tekton-dashboard"
+#steps["tekton.3.path"]="k8s/tekton/dashboard/"
 #
 steps["eduk8s.1.name"]="eduk8s"
 steps["eduk8s.1.path"]="k8s/eduk8s/"
@@ -80,8 +82,8 @@ function install_command {
   local path=$2
   [ -z "$app_name" ] || [ -z "$path" ] && echo "Error" && exit 1
 
-  echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default -y -f -"
-  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default -y -f -
+  echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/config -f ${WORK_DIR}/$path/downstream ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default -y -f -"
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/config -f ${WORK_DIR}/$path/downstream ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default -y -f -
 }
 
 function execute_all {

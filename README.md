@@ -228,9 +228,7 @@ kapp delete -a eduk8s -y -n default
 kapp delete -a wavefront -y -n default
 kapp delete -a kubeapps -y -n default
 kapp delete -a knative -y -n default
-kapp delete -a tekton-dashboard -y -n default
-kapp delete -a tekton-triggers -y -n default
-kapp delete -a tekton-release -y -n default
+kapp delete -a tekton -y -n default
 kapp delete -a kpack -y -n default
 kapp delete -a registry -y -n default
 kapp delete -a ingress -y -n default
