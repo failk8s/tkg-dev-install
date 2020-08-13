@@ -1232,14 +1232,20 @@ spec:
           containerPort: 8012
         - name: h2c
           containerPort: 8013
-        readinessProbe: &probe
+        readinessProbe:
           httpGet:
             port: 8012
             httpHeaders:
             - name: k-kubelet-probe
               value: "activator"
           failureThreshold: 12
-        livenessProbe: *probe
+        livenessProbe:
+          httpGet:
+            port: 8012
+            httpHeaders:
+            - name: k-kubelet-probe
+              value: "activator"
+          failureThreshold: 12
       # The activator (often) sits on the dataplane, and may proxy long (e.g.
       # streaming, websockets) requests.  We give a long grace period for the
       # activator to "lame duck" and drain outstanding requests before we
@@ -1345,13 +1351,18 @@ spec:
           containerPort: 8008
         - name: websocket
           containerPort: 8080
-        readinessProbe: &probe
+        readinessProbe:
           httpGet:
             port: 8080
             httpHeaders:
             - name: k-kubelet-probe
               value: "autoscaler"
-        livenessProbe: *probe
+        livenessProbe:
+          httpGet:
+            port: 8080
+            httpHeaders:
+            - name: k-kubelet-probe
+              value: "autoscaler"
 ---
 apiVersion: v1
 kind: Service
@@ -1535,7 +1546,7 @@ spec:
           containerPort: 8008
         - name: https-webhook
           containerPort: 8443
-        readinessProbe: &probe
+        readinessProbe:
           periodSeconds: 1
           httpGet:
             scheme: HTTPS
@@ -1543,7 +1554,14 @@ spec:
             httpHeaders:
             - name: k-kubelet-probe
               value: "webhook"
-        livenessProbe: *probe
+        livenessProbe:
+          periodSeconds: 1
+          httpGet:
+            scheme: HTTPS
+            port: 8443
+            httpHeaders:
+            - name: k-kubelet-probe
+              value: "webhook"
 ---
 apiVersion: v1
 kind: Service
@@ -1650,8 +1668,7 @@ metadata:
 spec:
   group: serving.knative.dev
   versions:
-  - &version
-    name: v1alpha1
+  - name: v1alpha1
     served: true
     storage: false
     subresources:
@@ -1677,11 +1694,58 @@ spec:
     - name: Reason
       type: string
       jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
-  - !!merge <<: *version
-    name: v1beta1
-  - !!merge <<: *version
-    name: v1
+  - name: v1beta1
+    served: true
+    storage: false
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        # this is a work around so we don't need to flush out the
+        # schema for each version at this time
+        #
+        # see issue: https://github.com/knative/serving/issues/912
+        x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: LatestCreated
+      type: string
+      jsonPath: .status.latestCreatedRevisionName
+    - name: LatestReady
+      type: string
+      jsonPath: .status.latestReadyRevisionName
+    - name: Ready
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].status"
+    - name: Reason
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
+  - name: v1
+    served: true
     storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        # this is a work around so we don't need to flush out the
+        # schema for each version at this time
+        #
+        # see issue: https://github.com/knative/serving/issues/912
+        x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: LatestCreated
+      type: string
+      jsonPath: .status.latestCreatedRevisionName
+    - name: LatestReady
+      type: string
+      jsonPath: .status.latestReadyRevisionName
+    - name: Ready
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].status"
+    - name: Reason
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
   names:
     kind: Configuration
     plural: configurations
@@ -1902,8 +1966,7 @@ metadata:
 spec:
   group: serving.knative.dev
   versions:
-  - &version
-    name: v1alpha1
+  - name: v1alpha1
     served: true
     storage: false
     subresources:
@@ -1932,11 +1995,64 @@ spec:
     - name: Reason
       type: string
       jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
-  - !!merge <<: *version
-    name: v1beta1
-  - !!merge <<: *version
-    name: v1
+  - name: v1beta1
+    served: true
+    storage: false
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        # this is a work around so we don't need to flush out the
+        # schema for each version at this time
+        #
+        # see issue: https://github.com/knative/serving/issues/912
+        x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: Config Name
+      type: string
+      jsonPath: ".metadata.labels['serving\\.knative\\.dev/configuration']"
+    - name: K8s Service Name
+      type: string
+      jsonPath: ".status.serviceName"
+    - name: Generation
+      type: string # int in string form :(
+      jsonPath: ".metadata.labels['serving\\.knative\\.dev/configurationGeneration']"
+    - name: Ready
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].status"
+    - name: Reason
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
+  - name: v1
+    served: true
     storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        # this is a work around so we don't need to flush out the
+        # schema for each version at this time
+        #
+        # see issue: https://github.com/knative/serving/issues/912
+        x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: Config Name
+      type: string
+      jsonPath: ".metadata.labels['serving\\.knative\\.dev/configuration']"
+    - name: K8s Service Name
+      type: string
+      jsonPath: ".status.serviceName"
+    - name: Generation
+      type: string # int in string form :(
+      jsonPath: ".metadata.labels['serving\\.knative\\.dev/configurationGeneration']"
+    - name: Ready
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].status"
+    - name: Reason
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
   names:
     kind: Revision
     plural: revisions
@@ -1983,8 +2099,7 @@ metadata:
 spec:
   group: serving.knative.dev
   versions:
-  - &version
-    name: v1alpha1
+  - name: v1alpha1
     served: true
     storage: false
     subresources:
@@ -2007,11 +2122,52 @@ spec:
     - name: Reason
       type: string
       jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
-  - !!merge <<: *version
-    name: v1beta1
-  - !!merge <<: *version
-    name: v1
+  - name: v1beta1
+    served: true
+    storage: false
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        # this is a work around so we don't need to flush out the
+        # schema for each version at this time
+        #
+        # see issue: https://github.com/knative/serving/issues/912
+        x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: URL
+      type: string
+      jsonPath: .status.url
+    - name: Ready
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].status"
+    - name: Reason
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
+  - name: v1
+    served: true
     storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        # this is a work around so we don't need to flush out the
+        # schema for each version at this time
+        #
+        # see issue: https://github.com/knative/serving/issues/912
+        x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: URL
+      type: string
+      jsonPath: .status.url
+    - name: Ready
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].status"
+    - name: Reason
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
   names:
     kind: Route
     plural: routes
@@ -2127,8 +2283,7 @@ metadata:
 spec:
   group: serving.knative.dev
   versions:
-  - &version
-    name: v1alpha1
+  - name: v1alpha1
     served: true
     storage: false
     subresources:
@@ -2157,11 +2312,64 @@ spec:
     - name: Reason
       type: string
       jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
-  - !!merge <<: *version
-    name: v1beta1
-  - !!merge <<: *version
-    name: v1
+  - name: v1beta
+    served: true
+    storage: false
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        # this is a work around so we don't need to flush out the
+        # schema for each version at this time
+        #
+        # see issue: https://github.com/knative/serving/issues/912
+        x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: URL
+      type: string
+      jsonPath: .status.url
+    - name: LatestCreated
+      type: string
+      jsonPath: .status.latestCreatedRevisionName
+    - name: LatestReady
+      type: string
+      jsonPath: .status.latestReadyRevisionName
+    - name: Ready
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].status"
+    - name: Reason
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
+  - name: v1
+    served: true
     storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        # this is a work around so we don't need to flush out the
+        # schema for each version at this time
+        #
+        # see issue: https://github.com/knative/serving/issues/912
+        x-kubernetes-preserve-unknown-fields: true
+    additionalPrinterColumns:
+    - name: URL
+      type: string
+      jsonPath: .status.url
+    - name: LatestCreated
+      type: string
+      jsonPath: .status.latestCreatedRevisionName
+    - name: LatestReady
+      type: string
+      jsonPath: .status.latestReadyRevisionName
+    - name: Ready
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].status"
+    - name: Reason
+      type: string
+      jsonPath: ".status.conditions[?(@.type=='Ready')].reason"
   names:
     kind: Service
     plural: services

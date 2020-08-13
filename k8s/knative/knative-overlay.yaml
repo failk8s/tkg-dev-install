@@ -33,7 +33,7 @@ data:
   httpProtocol: Enabled
 
 #! Remove CRDs that are also installed with tekton
-#@overlay/match by=overlay.subset({"kind":"CustomResourceDefinition", "metadata": {"name": "images.caching.internal.knative.dev"}}),expects=2
+#@overlay/match by=overlay.subset({"kind":"CustomResourceDefinition", "metadata": {"name": "images.caching.internal.knative.dev"}}),expects=1
 #@overlay/remove
 ---
 

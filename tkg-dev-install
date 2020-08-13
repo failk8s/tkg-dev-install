@@ -304,9 +304,9 @@ then
       full-eduk8s "$@"
       ;;
     *)
-      help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full-dev|full-eduk8s"
+      help "cert-manager|ingress|registry|kpack|tekton|knative|kubeapps|wavefront|eduk8s|full-dev|full-eduk8s"
       ;;
   esac
 else
-  help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full-dev|full-eduk8s"
+  help "cert-manager|ingress|registry|kpack|tekton|knative|kubeapps|wavefront|eduk8s|full-dev|full-eduk8s"
 fi
