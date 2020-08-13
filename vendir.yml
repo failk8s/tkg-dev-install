@@ -1,0 +1,190 @@
+# See: https://github.com/k14s/vendir/blob/develop/docs/vendir-spec.md
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+minimumRequiredVersion: 0.8.0
+directories:
+
+##########
+# cert-manager
+##########
+- path: k8s/cert-manager
+  contents:
+  - path: upstream/cert-manager
+    githubRelease:
+      slug: jetstack/cert-manager
+      tag: v0.16.1
+      disableAutoChecksumValidation: true
+    includePaths:
+    - cert-manager.crds.yaml
+    - cert-manager.yaml
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}
+
+##########
+# eduk8s
+##########
+- path: k8s/eduk8s
+  contents:
+  - path: upstream/eduk8s
+    git:
+      url: https://github.com/eduk8s/eduk8s
+      ref: 20.08.04.1
+    includePaths:
+    - resources/crds-v1/**/*
+    - resources/operator/**/*
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}
+
+##########
+# ingress
+##########
+- path: k8s/ingress
+  contents:
+  - path: upstream/contour
+    git:
+      url: https://github.com/projectcontour/contour
+      ref: v1.7.0
+    includePaths:
+    - examples/contour/**/*
+  - path: upstream/external-dns
+    git:
+      url: https://github.com/kubernetes-sigs/external-dns
+      ref: v0.7.3
+    includePaths:
+    - kustomize/external-dns-*
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}
+
+##########
+# knative
+##########
+- path: k8s/knative
+  contents:
+  - path: upstream/serving
+    githubRelease:
+      slug: knative/serving
+      tag: v0.16.0
+      disableAutoChecksumValidation: true
+    includePaths:
+#    - serving-crds.yaml
+#    - serving-core.yaml
+    - serving-nscert.yaml
+  - path: upstream/net-contour
+    githubRelease:
+      slug: knative/net-contour
+      tag: v0.16.0
+      disableAutoChecksumValidation: true
+    includePaths:
+    - net-contour.yaml
+  - path: upstream/net-certmanager
+    githubRelease:
+      slug: knative/net-certmanager
+      tag: v0.16.0
+      disableAutoChecksumValidation: true
+    includePaths:
+    - net-certmanager.yaml
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}
+
+##########
+# kpack
+##########
+- path: k8s/kpack
+  contents:
+  - path: upstream/kpack
+    githubRelease:
+      slug: pivotal/kpack
+      tag: v0.0.9
+      disableAutoChecksumValidation: true
+    includePaths:
+    - release-0.0.9.yaml
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}
+
+##########
+# kubeapps
+##########
+- path: k8s/kubeapps
+  contents:
+  - path: upstream
+    manual: {}
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}
+
+##########
+# registry
+##########
+- path: k8s/registry
+  contents:
+  - path: upstream
+    manual: {}
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}
+
+##########
+# tekton
+##########
+- path: k8s/tekton
+  contents:
+  - path: upstream/pipeline
+    githubRelease:
+      slug: tektoncd/pipeline
+      tag: v0.15.2
+      disableAutoChecksumValidation: true
+    includePaths:
+    - release.yaml
+  - path: upstream/triggers
+    githubRelease:
+      slug: tektoncd/triggers
+      tag: v0.7.0
+      disableAutoChecksumValidation: true
+    includePaths:
+    - release.yaml
+  - path: upstream/dashboard
+    githubRelease:
+      slug: tektoncd/dashboard
+      tag: v0.8.2
+      disableAutoChecksumValidation: true
+    includePaths:
+    - tekton-dashboard-release.yaml
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}
+
+##########
+# wavefront
+##########
+- path: k8s/wavefront
+  contents:
+  - path: upstream/collector
+    git:
+      url: https://github.com/wavefrontHQ/wavefront-collector-for-kubernetes
+      ref: v1.2.1
+    includePaths:
+    - deploy/kubernetes/**/*
+  - path: upstream/proxy
+    git:
+      url: https://github.com/wavefrontHQ/wavefront-kubernetes
+      ref: master
+    includePaths:
+    - wavefront-proxy/wavefront.yaml
+    - ksm-all-in-one/kube-state.yaml
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}

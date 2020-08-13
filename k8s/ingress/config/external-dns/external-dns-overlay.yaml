@@ -1,0 +1,52 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
+
+#@ d = data.values.domain or assert.fail("missing domain definition")
+#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
+
+#@ viewer_sa = "{}-viewer".format(data.values.externaldns.name)
+
+#@overlay/match by=overlay.or_op(overlay.subset({"kind": "ServiceAccount"}), overlay.subset({"kind": "Deployment"})), expects="1+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.ingress.namespace
+
+
+#! #@overlay/match by=overlay.subset({"kind": "ServiceAccount", "metadata": {"name": "external-dns"}})
+#! ---
+#! metadata:
+#!  annotations:
+#!    #@overlay/remove missing_ok=True
+#!    eks.amazonaws.com/role-arn:
+
+#@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata": {"name": "external-dns-viewer"}})
+---
+subjects:
+#@overlay/match by=overlay.map_key("name")
+- kind: ServiceAccount
+  name: external-dns
+  namespace: #@ data.values.ingress.namespace
+
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata": {"name": "external-dns"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.map_key("name")
+      - name: external-dns
+        #@overlay/replace
+        args:
+        - --source=service
+        #! - --source=ingress
+        #! will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
+        - #@ "--domain-filter={}".format(data.values.domain)
+        - --provider=aws
+        - --policy=upsert-only #! would prevent ExternalDNS from deleting any records, omit to enable full synchronization
+        - --aws-zone-type=public #! only look at public hosted zones (valid values are public, private or no value for both)
+        - --registry=txt
+        #! This is to identofy the owner of the txt records so that external-dns don't mess with existing records
+        - #@ "--txt-owner-id={}".format(data.values.externaldns.owner) 

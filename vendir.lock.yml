@@ -1,0 +1,101 @@
+apiVersion: vendir.k14s.io/v1alpha1
+directories:
+- contents:
+  - githubRelease:
+      url: https://api.github.com/repos/jetstack/cert-manager/releases/29442438
+    path: upstream/cert-manager
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/cert-manager
+- contents:
+  - git:
+      commitTitle: Update to version 200803.235755.6925c7f of eduk8s operator.
+      sha: dd15ca77d19c464afa2c0a0b043d76afc72dc39c
+    path: upstream/eduk8s
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/eduk8s
+- contents:
+  - git:
+      commitTitle: Update Contour Docker image to v1.7.0....
+      sha: c57014c9bf081485125ea538fe65eca580163072
+    path: upstream/contour
+  - git:
+      commitTitle: 'Merge pull request #1706 from kubernetes-sigs/changelog-for-v0.7.3...'
+      sha: 3a61439cd116741012026036e166008993d0d0e7
+    path: upstream/external-dns
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/ingress
+- contents:
+  - githubRelease:
+      url: https://api.github.com/repos/knative/serving/releases/28325061
+    path: upstream/serving
+  - githubRelease:
+      url: https://api.github.com/repos/knative-sandbox/net-contour/releases/28326148
+    path: upstream/net-contour
+  - githubRelease:
+      url: https://api.github.com/repos/knative-sandbox/net-certmanager/releases/28326254
+    path: upstream/net-certmanager
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/knative
+- contents:
+  - githubRelease:
+      url: https://api.github.com/repos/pivotal/kpack/releases/27343776
+    path: upstream/kpack
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/kpack
+- contents:
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/kubeapps
+- contents:
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/registry
+- contents:
+  - githubRelease:
+      url: https://api.github.com/repos/tektoncd/pipeline/releases/29523427
+    path: upstream/pipeline
+  - githubRelease:
+      url: https://api.github.com/repos/tektoncd/triggers/releases/29172094
+    path: upstream/triggers
+  - githubRelease:
+      url: https://api.github.com/repos/tektoncd/dashboard/releases/29112372
+    path: upstream/dashboard
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/tekton
+- contents:
+  - git:
+      commitTitle: include path in endpoint uniqueness
+      sha: 8c677ac392b34e1912da2d59485841fc349017dc
+    path: upstream/collector
+  - git:
+      commitTitle: Update README.md (#8)
+      sha: 257753b0d88417d59906c0b9510f3ec424928cef
+    path: upstream/proxy
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/wavefront
+kind: LockConfig
