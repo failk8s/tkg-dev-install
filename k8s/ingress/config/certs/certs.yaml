@@ -37,23 +37,6 @@ spec:
     - http01:
         ingress:
           class: #@ data.values.ingress.type
-
----
-
-apiVersion: cert-manager.io/v1alpha2
-kind: Certificate
-metadata:
-  name: wildcard
-  namespace: #@ data.values.ingress.namespace
-spec:
-  secretName: wildcard
-  issuerRef:
-    name: wildcard-lets-encrypt
-    kind: ClusterIssuer
-  dnsNames:
-  - #@ "*.{}".format(d)
-  - #@ "*.{}".format(w)
-
 ---
 
 #! We add a certificate delegation. This might avoid us the need to copy the wildcard cert
@@ -80,3 +63,32 @@ spec:
   - sourceSecret:
       name: wildcard
       namespace: #@ data.values.ingress.namespace
+---
+
+#@ if data.values.wildcard_tls.crt and data.values.wildcard_tls.key:
+kind: Secret
+apiVersion: v1
+metadata:
+  name: wildcard
+  namespace: #@ data.values.ingress.namespace
+type: kubernetes.io/tls
+data:
+  tls.crt: #@ base64.encode(data.values.wildcard_tls.crt)
+  tls.key: #@ base64.encode(data.values.wildcard_tls.key)
+---
+#@ else:
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: wildcard
+  namespace: #@ data.values.ingress.namespace
+spec:
+  secretName: wildcard
+  issuerRef:
+    name: wildcard-lets-encrypt
+    kind: ClusterIssuer
+  dnsNames:
+  - #@ "*.{}".format(d)
+  - #@ "*.{}".format(w)
+---
+#@ end

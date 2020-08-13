@@ -51,3 +51,9 @@ eduk8s:
 wavefront:
   uri:
   api_token:
+#! Provide a wildcard certificate, and we will not use a cert-manager Certificate with Let's Encrypt
+wildcard_tls:
+  #! Provide your tls.crt with yaml |
+  crt:
+  #! Provide your tls.key with yaml |
+  key:

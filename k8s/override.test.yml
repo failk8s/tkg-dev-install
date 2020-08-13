@@ -8,3 +8,16 @@ aws_secret_access_key: abABC1ABA1B1B2c/ABc3ABc/AbcdEFgHIJkl2abC
 wavefront:
   uri: https://vmware.wavefront.com
   api_token:  API_TOKEN
+wildcard_tls:
+  crt: |
+    -----BEGIN CERTIFICATE-----
+    ABCD
+    -----END CERTIFICATE-----
+    -----BEGIN CERTIFICATE-----
+    1234
+    -----END CERTIFICATE-----
+  key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    1234ABCD
+    -----END RSA PRIVATE KEY-----
+
