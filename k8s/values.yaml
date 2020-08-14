@@ -15,7 +15,7 @@ externaldns:
   name: external-dns
   owner: tanzu
 certs:
-  email: jorgemoralespou@gmail.com
+  email: user@example.com
   region: eu-west-1
 registry:
   namespace: tanzu-developer

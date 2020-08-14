@@ -44,8 +44,8 @@ subjects:
 ---
 metadata:
   annotations:
-    #@overlay/match missing_ok=True
-    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+#!    #@overlay/match missing_ok=True
+#!    service.beta.kubernetes.io/aws-load-balancer-type: nlb
     #@overlay/match missing_ok=True
     external-dns.alpha.kubernetes.io/hostname: #@ "*.{}.,*.{}.".format(data.values.domain, data.values.wildcard_domain)
 
