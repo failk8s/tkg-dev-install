@@ -8,37 +8,37 @@ set -uo pipefail
 
 declare -A steps
 steps['cert-manager.1.name']='cert-manager'
-steps['cert-manager.1.path']='k8s/cert-manager/'
+steps['cert-manager.1.path']='k8s/cert-manager'
 #
 steps["ingress.1.name"]="ingress"
-steps["ingress.1.path"]="k8s/ingress/"
+steps["ingress.1.path"]="k8s/ingress"
 #
 steps["knative.1.name"]="knative"
-steps["knative.1.path"]="k8s/knative/"
+steps["knative.1.path"]="k8s/knative"
 #
 steps["kpack.1.name"]="kpack"
-steps["kpack.1.path"]="k8s/kpack/"
+steps["kpack.1.path"]="k8s/kpack"
 #
 steps["kubeapps.1.name"]="kubeapps"
-steps["kubeapps.1.path"]="k8s/kubeapps/"
+steps["kubeapps.1.path"]="k8s/kubeapps"
 #
 steps["registry.1.name"]="registry"
-steps["registry.1.path"]="k8s/registry/"
+steps["registry.1.path"]="k8s/registry"
 #
 steps["tekton.1.name"]="tekton"
-steps["tekton.1.path"]="k8s/tekton/"
+steps["tekton.1.path"]="k8s/tekton"
 #steps["tekton.1.name"]="tekton-release"
-#steps["tekton.1.path"]="k8s/tekton/release/"
+#steps["tekton.1.path"]="k8s/tekton/release"
 #steps["tekton.2.name"]="tekton-triggers"
-#steps["tekton.2.path"]="k8s/tekton/triggers/"
+#steps["tekton.2.path"]="k8s/tekton/triggers"
 #steps["tekton.3.name"]="tekton-dashboard"
-#steps["tekton.3.path"]="k8s/tekton/dashboard/"
+#steps["tekton.3.path"]="k8s/tekton/dashboard"
 #
 steps["eduk8s.1.name"]="eduk8s"
-steps["eduk8s.1.path"]="k8s/eduk8s/"
+steps["eduk8s.1.path"]="k8s/eduk8s"
 #
 steps["wavefront.1.name"]="wavefront"
-steps["wavefront.1.path"]="k8s/wavefront/"
+steps["wavefront.1.path"]="k8s/wavefront"
 
 FULL_DEV_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront"
 FULL_EDUK8S_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront eduk8s"

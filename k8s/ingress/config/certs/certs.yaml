@@ -66,6 +66,7 @@ spec:
 ---
 
 #@ if data.values.wildcard_tls.crt and data.values.wildcard_tls.key:
+---
 kind: Secret
 apiVersion: v1
 metadata:
@@ -77,6 +78,7 @@ data:
   tls.key: #@ base64.encode(data.values.wildcard_tls.key)
 ---
 #@ else:
+---
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
