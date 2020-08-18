@@ -1,0 +1,43 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
+#@ load("@ytt:overlay", "overlay")
+
+#@ d = data.values.domain or assert.fail("missing domain definition")
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata" : { "name": "hub"}}),expects=1
+---
+data:
+  #@yaml/text-templated-strings
+  application.yaml: |-
+    catalog:
+      portals:
+      - name: eduk8s-tmc-trainingportal
+        url: https://eduk8s-tmc-trainingportal-ui.(@= data.values.wildcard_domain @)
+        robot:
+          client_id: (@= data.values.eduk8s.robot.client_id @)
+          client_secret: (@= data.values.eduk8s.robot.client_secret @)
+          username: (@= data.values.eduk8s.robot.username @)
+          password: (@= data.values.eduk8s.robot.password @)
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata" : { "name": "hub"}}),expects=1
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.index(0)
+      - image: #@ data.values.eduk8s.hub.image
+        #@overlay/match missing_ok=True
+        imagePullPolicy: #@ data.values.eduk8s.pullpolicy
+
+#@overlay/match by=overlay.subset({"kind":"Ingress", "metadata": {"name": "hub"}})
+---
+spec:
+  rules:
+  #@overlay/match by=overlay.index(0)
+  - host: #@ "hub.{}".format(d)
+  #@overlay/match missing_ok=True
+  tls:
+  - hosts:
+    - #@ "hub.{}".format(d)
+    secretName: #@ data.values.eduk8s.wildcard

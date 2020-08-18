@@ -1,0 +1,12 @@
+apiVersion: training.eduk8s.io/v1alpha1
+kind: TrainingPortal
+metadata:
+  name: lab-container-basics
+spec:
+  portal:
+    capacity: 1
+    reserved: 1
+    expires: 60m
+    orphaned: 5m
+  workshops:
+  - name: lab-container-basics

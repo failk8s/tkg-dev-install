@@ -1,0 +1,15 @@
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind": "Workshop"}),expects="0+"
+---
+spec:
+  #@overlay/match missing_ok=True
+  #@overlay/remove
+  authors:
+
+#@overlay/match by=overlay.subset({"kind": "Workshop"}),expects="0+"
+---
+spec:
+  #@overlay/match missing_ok=True
+  authors:
+  - eduk8s team

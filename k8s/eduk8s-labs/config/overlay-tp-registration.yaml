@@ -1,0 +1,11 @@
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind":"TrainingPortal"}),expects="0+"
+---
+spec:
+  #@overlay/match missing_ok=True
+  portal:
+    #@overlay/match missing_ok=True
+    registration:
+      type: one-step
+      enabled: false

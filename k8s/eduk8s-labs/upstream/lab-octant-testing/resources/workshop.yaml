@@ -1,0 +1,31 @@
+apiVersion: training.eduk8s.io/v1alpha2
+kind: Workshop
+metadata:
+  name: lab-octant-testing
+spec:
+  title: Octant Testing
+  description: An introduction to Octant and play area for testing it
+  vendor: eduk8s.io
+  authors:
+  - Graham Dumpleton
+  difficulty: beginner
+  duration: 30m
+  url: https://github.com/eduk8s-labs/lab-octant-testing
+  tags:
+  - playground
+  - tools
+  content:
+    files: github.com/eduk8s-labs/lab-octant-testing
+  session:
+    namespaces:
+      budget: medium
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      console:
+        enabled: true
+        vendor: octant
+    dashboards:
+    - name: Video
+      url: https://www.youtube.com/embed/D5PLsXP9aPc

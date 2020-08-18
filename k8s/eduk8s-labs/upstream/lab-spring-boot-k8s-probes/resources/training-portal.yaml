@@ -1,0 +1,11 @@
+apiVersion: training.eduk8s.io/v1alpha1
+kind: TrainingPortal
+metadata:
+  name: lab-spring-boot-k8s-probes
+spec:
+  workshops:
+    - name: lab-spring-boot-k8s-probes
+      reserved: 1
+      capacity: 5
+      expires: 60m
+      orphaned: 5m

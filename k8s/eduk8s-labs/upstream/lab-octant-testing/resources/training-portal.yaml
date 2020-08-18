@@ -1,0 +1,10 @@
+apiVersion: training.eduk8s.io/v1alpha1
+kind: TrainingPortal
+metadata:
+  name: lab-octant-testing
+spec:
+  workshops:
+  - name: lab-octant-testing
+    capacity: 1
+    expires: 30m
+    orphaned: 5m

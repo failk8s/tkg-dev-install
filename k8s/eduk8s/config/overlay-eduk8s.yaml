@@ -1,0 +1,32 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@ sa=overlay.subset({"kind": "ServiceAccount", "metadata": {"name": "eduk8s"}})
+#@ deployment=overlay.subset({"kind": "Deployment", "metadata": {"name": "eduk8s-operator"}})
+#@ crb=overlay.subset({"kind": "ClusterRoleBinding", "metadata": {"name": "eduk8s-cluster-admin"}})
+#@overlay/match by=overlay.or_op(sa,deployment,crb), expects=3
+---
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.eduk8s.namespace
+
+#@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata": {"name": "eduk8s-cluster-admin"}})
+---
+subjects:
+#@overlay/match by=overlay.map_key("name")
+- kind: ServiceAccount
+  name: eduk8s
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.eduk8s.namespace
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata" : { "name": "eduk8s-operator"}}),expects=1
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.index(0)
+      - image: #@ data.values.eduk8s.operator.image
+        #@overlay/match missing_ok=True
+        imagePullPolicy: #@ data.values.eduk8s.pullpolicy
+
