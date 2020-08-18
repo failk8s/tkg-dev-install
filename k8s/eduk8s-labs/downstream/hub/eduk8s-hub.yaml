@@ -4,6 +4,7 @@ metadata:
   name: hub
   namespace: eduk8s
   annotations:
+    kapp.k14s.io/change-group: "eduk8s/hub"
     kapp.k14s.io/versioned: ""
 data:
   application.yaml:
@@ -13,6 +14,8 @@ kind: Deployment
 metadata:
   name: hub
   namespace: eduk8s
+  annotations:
+    kapp.k14s.io/change-group: "eduk8s/hub"
 spec:
   replicas: 1
   selector:
@@ -58,6 +61,8 @@ kind: Service
 metadata:
   name: hub
   namespace: eduk8s
+  annotations:
+    kapp.k14s.io/change-group: "eduk8s/hub"
 spec:
   ports:
   - port: 8080
@@ -74,6 +79,8 @@ kind: Ingress
 metadata:
   name: hub
   namespace: eduk8s
+  annotations:
+    kapp.k14s.io/change-group: "eduk8s/hub"
 spec:
   rules:
   - host: $HUB_DASHBOARD
