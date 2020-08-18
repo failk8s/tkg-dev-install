@@ -19,14 +19,25 @@ subjects:
   #@overlay/match missing_ok=True
   namespace: #@ data.values.eduk8s.namespace
 
+#@ if/end data.values.eduk8s.operator.image:
 #@overlay/match by=overlay.subset({"kind":"Deployment", "metadata" : { "name": "eduk8s-operator"}}),expects=1
 ---
 spec:
   template:
     spec:
       containers:
-      #@overlay/match by=overlay.index(0)
-      - image: #@ data.values.eduk8s.operator.image
+      #@overlay/match by="name"
+      - name: eduk8s
+        image: #@ data.values.eduk8s.operator.image
+
+#@ if/end data.values.eduk8s.pullpolicy:
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata" : { "name": "eduk8s-operator"}}),expects=1
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by="name"
+      - name: eduk8s
         #@overlay/match missing_ok=True
         imagePullPolicy: #@ data.values.eduk8s.pullpolicy
-
