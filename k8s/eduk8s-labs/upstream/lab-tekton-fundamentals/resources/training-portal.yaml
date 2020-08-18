@@ -1,0 +1,13 @@
+apiVersion: training.eduk8s.io/v1alpha1
+kind: TrainingPortal
+metadata:
+  name: lab-tekton-fundamentals
+spec:
+  portal:
+    # See https://docs.eduk8s.io/en/latest/runtime-environment/training-portal.html#capacity-of-the-training-portal for more details on settings below:
+    capacity: 10
+    reserved: 1
+    expires: 60m
+    orphaned: 15m
+  workshops:
+  - name: lab-tekton-fundamentals

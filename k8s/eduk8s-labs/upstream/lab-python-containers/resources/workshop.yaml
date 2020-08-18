@@ -1,0 +1,25 @@
+apiVersion: training.eduk8s.io/v1alpha2
+kind: Workshop
+metadata:
+  name: lab-python-containers
+spec:
+  vendor: eduk8s.io
+  title: Python Containers
+  description: An interactive workshop on constructing images for Python applications.
+  url: https://github.com/eduk8s-labs/lab-python-containers
+  tags:
+  - development
+  - languages
+  - python
+  content:
+    files: github.com/eduk8s-labs/lab-python-containers
+  duration: 75m
+  session:
+    namespaces:
+      budget: small
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      docker:
+        enabled: true

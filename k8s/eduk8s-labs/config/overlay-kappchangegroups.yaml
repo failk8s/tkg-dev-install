@@ -1,0 +1,12 @@
+#@ load("@ytt:overlay", "overlay")
+
+#@ trainingportal=overlay.subset({"kind":"TrainingPortal"})
+#@ workshop=overlay.subset({"kind":"Workshop"})
+#@overlay/match by=overlay.and_op(trainingportal, workshop),expects="0+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  annotations:
+    kapp.k14s.io/change-group: "eduk8s/workshop"
+    kapp.k14s.io/change-rule.insert: "upsert after upserting eduk8s/hub"
+    kapp.k14s.io/change-rule.delete: "delete after deleting eduk8s/hub"

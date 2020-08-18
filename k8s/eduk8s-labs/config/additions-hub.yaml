@@ -1,0 +1,57 @@
+#@ load("@ytt:data", "data")
+
+#! Add a condition that if labs are to be deployed, then add these
+#! else add an overlay that will delete all TrainingPortal/Workshops
+---
+apiVersion: training.eduk8s.io/v1alpha1
+kind: TrainingPortal
+metadata:
+  name: eduk8s-tmc-trainingportal
+spec:
+  portal:
+    # clients:
+    #   robot:
+    #     id: robot-client-id
+    #     secret: robot-client-id
+    # credentials:
+    #   robot:
+    #     password: robot-password
+    #     username: robot@eduk8s
+    # registration:
+    #   enabled: false
+    #   type: one-step
+    initial: 1
+    reserved: 1
+    capacity: 50
+  workshops:
+    - name: lab-container-basics
+      expires: 60m
+      orphaned: 5m
+    - name: lab-getting-started-k14s
+      expires: 20m
+      orphaned: 5m
+    - name: lab-image-security
+      expires: 60m
+      orphaned: 5m
+    - name: lab-k8s-fundamentals
+      expires: 60m
+      orphaned: 5m
+    - name: lab-octant-testing
+      expires: 20m
+      orphaned: 5m
+    - name: lab-python-containers
+      expires: 75m
+      orphaned: 5m
+    - name: lab-spring-boot-k8s-gs
+      expires: 15m
+      orphaned: 5m
+    - name: lab-spring-boot-k8s-probes
+      expires: 15m
+      orphaned: 5m
+    - name: lab-spring-boot-k8s-skaffold
+      expires: 15m
+      orphaned: 5m
+    - name: lab-tekton-fundamentals
+      expires: 60m
+      orphaned: 5m
+

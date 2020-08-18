@@ -39,9 +39,12 @@ steps["eduk8s.1.path"]="k8s/eduk8s"
 #
 steps["wavefront.1.name"]="wavefront"
 steps["wavefront.1.path"]="k8s/wavefront"
+#
+steps["eduk8s-labs.1.name"]="eduk8s-labs"
+steps["eduk8s-labs.1.path"]="k8s/eduk8s-labs"
 
 FULL_DEV_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront"
-FULL_EDUK8S_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront eduk8s"
+FULL_EDUK8S_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront eduk8s eduk8s-labs"
 
 #install_log=$(mktemp install.log.XXXXXX)
 install_log=install.log
@@ -340,6 +343,10 @@ then
       shift # past argument
       execute eduk8s "$@"
       ;;
+    eduk8s-labs)
+      shift # past argument
+      execute eduk8s-labs "$@"
+      ;;
     wavefront)
       shift # past argument
       execute wavefront "$@"
@@ -353,9 +360,9 @@ then
       full eduk8s "$@"
       ;;
     *)
-      help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full-dev|full-eduk8s"
+      help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|eduk8s-labs|full-dev|full-eduk8s"
       ;;
   esac
 else
-  help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|full-dev|full-eduk8s"
+  help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|eduk8s-labs|full-dev|full-eduk8s"
 fi

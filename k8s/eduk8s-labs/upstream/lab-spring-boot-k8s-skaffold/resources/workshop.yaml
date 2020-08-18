@@ -1,0 +1,35 @@
+apiVersion: training.eduk8s.io/v1alpha2
+kind: Workshop
+metadata:
+  name: lab-spring-boot-k8s-skaffold
+spec:
+  vendor: eduk8s.io
+  title: Using Skaffold to deploy a Spring Boot on Kubernetes
+  description: Use Skaffold to create a Spring Boot application and deploy it to Kubernetes
+  url: https://github.com/eduk8s-labs/lab-spring-boot-k8s-skaffold
+  duration: 15m
+  content: 
+    image: quay.io/eduk8s-labs/lab-spring-boot-k8s-getting-started:latest
+    files: github.com/eduk8s-labs/lab-spring-boot-k8s-skaffold
+  session:
+    budget: large
+    resources:
+      memory: 2Gi
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      console:
+        enabled: true
+      editor:
+        enabled: true
+      registry:
+        enabled: true
+      docker:
+        enabled: true
+    ingresses:
+    - name: application
+      port: 8080
+    #dashboards:
+    #- name: Application
+    #  url: "$(ingress_protocol)://$(session_namespace)-application.$(ingress_domain)/"      

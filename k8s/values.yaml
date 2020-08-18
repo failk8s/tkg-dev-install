@@ -48,6 +48,11 @@ eduk8s:
   #!            client_secret: <robot-client-id>
   #!            username:  <robot-client-id>
   #!            password:  <robot-client-id>
+  robot:
+    client_id: robot-client-id
+    client_secret: robot-client-secret
+    username: robot@eduk8s
+    password: robot-password
 wavefront:
   uri:
   api_token:
