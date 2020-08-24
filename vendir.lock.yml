@@ -102,4 +102,51 @@ directories:
   - manual: {}
     path: config
   path: k8s/wavefront
+- contents:
+  - git:
+      commitTitle: Move budget location, remove logo.
+      sha: 55d5d1b951edff899eb94cbacb17e8311c6ca4b6
+    path: upstream/lab-container-basics
+  - git:
+      commitTitle: Move budget location, remove logo.
+      sha: 97cd55855f1df7dc6dc73959292dfa77b045bebe
+    path: upstream/lab-python-containers
+  - git:
+      commitTitle: Move budget location, remove logo.
+      sha: 256af0eebec7b4f1449110c9b5f39785c6030bde
+    path: upstream/lab-image-security
+  - git:
+      commitTitle: Update to version 200824.030625.7813530 of base environment workshop
+        image.
+      sha: 1c5ecb334918b9e60d9378fe52a5146bb374abd4
+    path: upstream/lab-k8s-fundamentals
+  - git:
+      commitTitle: Updated title to remove testing
+      sha: 822234c1e32d6a11a4e778c55da81e0f4ae09379
+    path: upstream/lab-getting-started-with-octant
+  - git:
+      commitTitle: Rename repository
+      sha: 608a05639a151cf2f82a40dbd19ea8a1695952e8
+    path: upstream/lab-getting-started-with-carvel
+  - git:
+      commitTitle: Update JDK base image version.
+      sha: 87848f92efcbd6f35fb78d914e8d7d4aac11b9db
+    path: upstream/lab-spring-boot-k8s-getting-started
+  - git:
+      commitTitle: Add word to link
+      sha: 8ae49bf14c7ade7fc943cf0c04050ab878d63ffd
+    path: upstream/lab-spring-boot-k8s-probes
+  - git:
+      commitTitle: Add word to link
+      sha: 241efaa9e882b3599b024e7e6084a4e0300653f9
+    path: upstream/lab-spring-boot-k8s-skaffold
+  - git:
+      commitTitle: remove environment/request resources
+      sha: 3018f97a96bfacb28a7119348eab90824aa131ab
+    path: upstream/lab-tekton-fundamentals
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/eduk8s-labs
 kind: LockConfig

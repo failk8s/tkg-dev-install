@@ -1,7 +1,7 @@
 apiVersion: training.eduk8s.io/v1alpha1
 kind: TrainingPortal
 metadata:
-  name: lab-getting-started-k14s
+  name: lab-getting-started-with-carvel
 spec:
   portal:
     reserved: 1
@@ -9,4 +9,4 @@ spec:
     expires: 60m
     orphaned: 5m
   workshops:
-  - name: lab-getting-started-k14s
+  - name: lab-getting-started-with-carvel

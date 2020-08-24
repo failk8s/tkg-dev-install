@@ -12,7 +12,7 @@ data:
     catalog:
       portals:
       - name: eduk8s-tmc-trainingportal
-        url: https://eduk8s-tmc-trainingportal-ui.(@= data.values.wildcard_domain @)
+        url: https://eduk8s-labs-ui.(@= data.values.wildcard_domain @)
         robot:
           client_id: (@= data.values.eduk8s.robot.client_id @)
           client_secret: (@= data.values.eduk8s.robot.client_secret @)

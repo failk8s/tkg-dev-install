@@ -6,7 +6,7 @@
 apiVersion: training.eduk8s.io/v1alpha1
 kind: TrainingPortal
 metadata:
-  name: eduk8s-tmc-trainingportal
+  name: eduk8s-labs
 spec:
   portal:
     # clients:
@@ -27,7 +27,7 @@ spec:
     - name: lab-container-basics
       expires: 60m
       orphaned: 5m
-    - name: lab-getting-started-k14s
+    - name: lab-getting-started-with-carvel
       expires: 20m
       orphaned: 5m
     - name: lab-image-security
@@ -36,7 +36,7 @@ spec:
     - name: lab-k8s-fundamentals
       expires: 60m
       orphaned: 5m
-    - name: lab-octant-testing
+    - name: lab-getting-started-with-octant
       expires: 20m
       orphaned: 5m
     - name: lab-python-containers

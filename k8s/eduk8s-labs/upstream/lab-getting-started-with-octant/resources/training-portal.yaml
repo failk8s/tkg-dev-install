@@ -1,10 +1,10 @@
 apiVersion: training.eduk8s.io/v1alpha1
 kind: TrainingPortal
 metadata:
-  name: lab-octant-testing
+  name: lab-getting-started-with-octant
 spec:
   workshops:
-  - name: lab-octant-testing
+  - name: lab-getting-started-with-octant
     capacity: 1
     expires: 30m
     orphaned: 5m

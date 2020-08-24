@@ -222,16 +222,16 @@ directories:
     includePaths:
     - resources/training-portal.yaml
     - resources/workshop.yaml
-  - path: upstream/lab-octant-testing
+  - path: upstream/lab-getting-started-with-octant
     git:
-      url: https://github.com/eduk8s-labs/lab-octant-testing
+      url: https://github.com/eduk8s-labs/lab-getting-started-with-octant
       ref: master
     includePaths:
     - resources/training-portal.yaml
     - resources/workshop.yaml
-  - path: upstream/lab-getting-started-with-k14s
+  - path: upstream/lab-getting-started-with-carvel
     git:
-      url: https://github.com/eduk8s-labs/lab-getting-started-with-k14s
+      url: https://github.com/eduk8s-labs/lab-getting-started-with-carvel
       ref: master
     includePaths:
     - resources/training-portal.yaml

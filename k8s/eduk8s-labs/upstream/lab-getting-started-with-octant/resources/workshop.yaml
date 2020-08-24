@@ -1,21 +1,21 @@
 apiVersion: training.eduk8s.io/v1alpha2
 kind: Workshop
 metadata:
-  name: lab-octant-testing
+  name: lab-getting-started-with-octant
 spec:
-  title: Octant Testing
-  description: An introduction to Octant and play area for testing it
+  title: Getting Started with Octant
+  description: An introduction to Octant, a Graphical UI to your Kubernetes clusters
   vendor: eduk8s.io
   authors:
   - Graham Dumpleton
   difficulty: beginner
   duration: 30m
-  url: https://github.com/eduk8s-labs/lab-octant-testing
+  url: https://github.com/eduk8s-labs/lab-getting-started-with-octant
   tags:
   - playground
   - tools
   content:
-    files: github.com/eduk8s-labs/lab-octant-testing
+    files: github.com/eduk8s-labs/lab-getting-started-with-octant
   session:
     namespaces:
       budget: medium
