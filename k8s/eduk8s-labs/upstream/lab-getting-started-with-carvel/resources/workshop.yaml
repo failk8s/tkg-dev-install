@@ -13,9 +13,9 @@ spec:
   tags:
   - tools
   - development
-  url: https://github.com/eduk8s-tests/lab-getting-started-with-carvel
+  url: https://github.com/eduk8s-labs/lab-getting-started-with-carvel
   content:
-    files: github.com/eduk8s-tests/lab-getting-started-with-carvel
+    files: github.com/eduk8s-labs/lab-getting-started-with-carvel
   session:
     budget: small
     resources:
