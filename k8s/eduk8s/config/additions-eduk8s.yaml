@@ -52,8 +52,17 @@ spec:
   storage:
     #@ if/end data.values.privileged_clusterrole_name:
     group: 1
-  #@ if data.values.eduk8s.google_analytics:
+  theme:
+    #@ if/end data.values.eduk8s.dashboard_style:
+    dashboard:
+      style: #@ data.values.eduk8s.dashboard_style
+    #@ if/end data.values.eduk8s.workshop_style:
+    workshop:
+      style: #@ data.values.eduk8s.workshop_style
+    #@ if/end data.values.eduk8s.portal_style:
+    portal:
+      style: #@ data.values.eduk8s.portal_style
+  #@ if/end data.values.eduk8s.google_analytics:
   analytics:
     google:
       trackingId: #@ data.values.eduk8s.google_analytics
-  #@ end

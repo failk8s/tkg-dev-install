@@ -11,8 +11,8 @@ directories:
   path: k8s/cert-manager
 - contents:
   - git:
-      commitTitle: Update to version 200817.122357.23c16b1 of eduk8s-operator.
-      sha: 11165c2fc6e58446dd693abc7c71caecaf97969a
+      commitTitle: Update to version 200826.073717.45b2cfe of the eduk8s operator.
+      sha: 59fbb0b972c11171996883fda32541535f39da83
     path: upstream/eduk8s
   - manual: {}
     path: downstream
@@ -116,21 +116,20 @@ directories:
       sha: 256af0eebec7b4f1449110c9b5f39785c6030bde
     path: upstream/lab-image-security
   - git:
-      commitTitle: Update to version 200824.030625.7813530 of base environment workshop
-        image.
-      sha: 1c5ecb334918b9e60d9378fe52a5146bb374abd4
+      commitTitle: Update to latest workshop base image.
+      sha: 5ba499a71c282b3294e6819e1c057e1142b9c2a3
     path: upstream/lab-k8s-fundamentals
   - git:
       commitTitle: Updated title to remove testing
       sha: 822234c1e32d6a11a4e778c55da81e0f4ae09379
     path: upstream/lab-getting-started-with-octant
   - git:
-      commitTitle: Rename repository
-      sha: 608a05639a151cf2f82a40dbd19ea8a1695952e8
+      commitTitle: Updated workshop reference
+      sha: 8872cdf91eca40be0c7413324c5f2ccf15d08346
     path: upstream/lab-getting-started-with-carvel
   - git:
-      commitTitle: Update JDK base image version.
-      sha: 87848f92efcbd6f35fb78d914e8d7d4aac11b9db
+      commitTitle: Update to latest JDK 11 base image.
+      sha: 0e9dfb55626d83f52e3641150f714b8a28ffdabd
     path: upstream/lab-spring-boot-k8s-getting-started
   - git:
       commitTitle: Add word to link
