@@ -65,20 +65,27 @@ WORK_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-CLUSTER=`kubectl config view -o jsonpath='{ .contexts[?(@.name == "'$(kubectl config current-context 2>/dev/null)'")].context.cluster }' 2>/dev/null`
-[ "x$CLUSTER" == "x" ] && echo "kubectl could not determine current cluster or is not installed" && exit 1
-
-
 #
 # CLI_ARGS
 SHOW_HELP="n"
 OVERRIDE_FILE=${OVERRIDE_FILE:-""}
+KUBECONFIG_FILE=${KUBECONFIG_FILE:-""}
 OVERLAY_FILE=${OVERLAY_FILE:-""}
 CONFIRM=${CONFIRM:-""}
 VERIFY=${VERIFY:-""}
 UNINSTALL=${VERIFY:-""}
 file_opt=""
 overlay_opt=""
+
+function validate_config {
+  local kubeconfig=""
+  if [ "$KUBECONFIG_FILE" != "" ]; then
+    kubeconfig="--kubeconfig=$KUBECONFIG_FILE"
+  fi
+  local CMD="kubectl ${kubeconfig} config view -o jsonpath='{ .contexts[?(@.name == \"'$(kubectl ${kubeconfig} config current-context 2>/dev/null)'\")].context.cluster }'"
+  local CLUSTER=`kubectl ${kubeconfig} config view -o jsonpath='{ .contexts[?(@.name == "'$(kubectl ${kubeconfig} config current-context 2>/dev/null)'")].context.cluster }' 2>/dev/null`
+  [ "x$CLUSTER" == "x" ] && echo "[ERROR] kubectl could not determine current cluster or is not installed" && echo "We executed the following command:" && echo "$CMD" && exit 1
+}
 
 #
 # Args:
@@ -89,8 +96,13 @@ function install_command {
   local path=$2
   [ -z "$app_name" ] || [ -z "$path" ] && echo "Error" && exit 1
 
-  echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/config -f ${WORK_DIR}/$path/downstream ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default -y -f -"
-  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/config -f ${WORK_DIR}/$path/downstream ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default -y -f -
+  local kubeconfig=""
+  if [ "$KUBECONFIG_FILE" != "" ]; then
+    kubeconfig=" --kubeconfig $KUBECONFIG_FILE"
+  fi
+
+  echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/config -f ${WORK_DIR}/$path/downstream ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default ${kubeconfig} -y -f -"
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/config -f ${WORK_DIR}/$path/downstream ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default ${kubeconfig} -y -f -
 }
 
 #
@@ -102,8 +114,13 @@ function uninstall_command {
   local path=$2
   [ -z "$app_name" ] || [ -z "$path" ] && echo "Error" && exit 1
 
-  echo "kapp delete -a ${app_name} -n default -y"
-  kapp delete -a ${app_name} -n default -y
+  local kubeconfig=""
+  if [ "${KUBECONFIG_FILE}" != "" ]; then
+    kubeconfig=" --kubeconfig ${KUBECONFIG_FILE}"
+  fi
+
+  echo "kapp delete -a ${app_name} -n default ${kubeconfig} -y"
+  kapp delete -a ${app_name} -n default ${kubeconfig} -y
 }
 
 function install_steps {
@@ -163,6 +180,7 @@ function help-options {
   echo "    -o=<FILE>|--overlay=<FILE>"
   echo "    -o|--overlay <FILE>        Provides an overlay file, to alter install scripts"
   echo "    -u|--uninstall             Uninstalls a component"
+  echo "    -k|--kubeconfig            Kubeconfig file to use"
   echo "    -h|--help                  Shows the help for the command"
 }
 
@@ -265,6 +283,15 @@ function parse_args {
         SHOW_HELP="true"
         shift # past argument
         ;;
+      -k|--kubeconfig)
+        KUBECONFIG_FILE="$2"
+        shift # past argument
+        shift # past value
+        ;;
+      -k=*|--kubeconfig=*)
+        KUBECONFIG_FILE="${i#*=}"
+        shift # past argument
+        ;;
       -v|--verify)
         VERIFY="true"
         shift # past argument
@@ -305,6 +332,7 @@ function parse_args {
 #  echo "OVERRIDE_FILE=$OVERRIDE_FILE"
 #  echo "OVERLAY_FILE=$OVERLAY_FILE"
 #  echo "CONFIRM=$CONFIRM"
+  validate_config
 }
 
 if [[ $# -gt 0 ]]
