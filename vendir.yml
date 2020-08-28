@@ -30,7 +30,7 @@ directories:
   - path: upstream/eduk8s
     git:
       url: https://github.com/eduk8s/eduk8s
-      ref: 20.08.26.1
+      ref: 20.08.28.1
     includePaths:
     - resources/crds-v1/**/*
     - resources/operator/**/*

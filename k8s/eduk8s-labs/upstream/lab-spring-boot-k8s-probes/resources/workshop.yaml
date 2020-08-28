@@ -7,9 +7,9 @@ spec:
   title: Adding Probes to Spring Boot on Kubernetes
   description: Add readiness and liveness probes to a Spring Boot application and deploy it to Kubernetes
   url: https://github.com/eduk8s-labs/lab-spring-boot-k8s-probes
-  duration: 15m
+  duration: 20m
   content: 
-    image: quay.io/eduk8s-labs/lab-spring-boot-k8s-getting-started:latest
+    image: jdk11-environment:*
     files: github.com/eduk8s-labs/lab-spring-boot-k8s-probes
   session:
     budget: large
@@ -21,6 +21,7 @@ spec:
         layout: split
       console:
         enabled: true
+        vendor: octant
       editor:
         enabled: true
       registry:

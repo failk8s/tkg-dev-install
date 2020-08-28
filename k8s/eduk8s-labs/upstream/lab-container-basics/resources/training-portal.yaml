@@ -6,7 +6,7 @@ spec:
   portal:
     capacity: 1
     reserved: 1
-    expires: 60m
+    expires: 45m
     orphaned: 5m
   workshops:
   - name: lab-container-basics
