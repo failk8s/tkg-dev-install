@@ -11,8 +11,8 @@ directories:
   path: k8s/cert-manager
 - contents:
   - git:
-      commitTitle: Update to version 200828.103859.8cc3f24 of eduk8s operator.
-      sha: ab11dcc3ce211fd415697181c85bed2192eb6692
+      commitTitle: Update to version 200829.075640.cd9cfa4 of eduk8s operator.
+      sha: 99e234080954556af3206525d1b9ace5c781da24
     path: upstream/eduk8s
   - manual: {}
     path: downstream
