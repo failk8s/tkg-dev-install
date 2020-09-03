@@ -6,9 +6,9 @@ metadata:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: builds.build.pivotal.io
+  name: builds.kpack.io
 spec:
-  group: build.pivotal.io
+  group: kpack.io
   version: v1alpha1
   names:
     kind: Build
@@ -35,17 +35,15 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: builders.build.pivotal.io
+  name: builders.kpack.io
 spec:
-  group: build.pivotal.io
+  group: kpack.io
   version: v1alpha1
   names:
     kind: Builder
     singular: builder
     plural: builders
     shortNames:
-    - cnbbuilder
-    - cnbbuilders
     - bldr
     - bldrs
     categories:
@@ -64,9 +62,9 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: clusterbuilders.build.pivotal.io
+  name: clusterbuilders.kpack.io
 spec:
-  group: build.pivotal.io
+  group: kpack.io
   version: v1alpha1
   names:
     kind: ClusterBuilder
@@ -74,6 +72,7 @@ spec:
     plural: clusterbuilders
     shortNames:
     - clstbldr
+    - clstbldrs
     categories:
     - kpack
   scope: Cluster
@@ -86,6 +85,59 @@ spec:
   - name: Ready
     type: string
     JSONPath: .status.conditions[?(@.type=="Ready")].status
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: clusterstores.kpack.io
+spec:
+  group: kpack.io
+  version: v1alpha1
+  names:
+    kind: ClusterStore
+    singular: clusterstore
+    plural: clusterstores
+    categories:
+    - kpack
+  scope: Cluster
+  subresources:
+    status: {}
+  additionalPrinterColumns:
+  - name: Ready
+    type: string
+    JSONPath: .status.conditions[?(@.type=="Ready")].status
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: build-init-image
+  namespace: kpack
+data:
+  image: gcr.io/cf-build-service-public/kpack/build-init@sha256:8136ff3a64517457b91f86bf66b8ffe13b986aaf3511887eda107e59dcb8c632
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rebase-image
+  namespace: kpack
+data:
+  image: gcr.io/cf-build-service-public/kpack/rebase@sha256:70e1d8837773d623c67f9e9f09cddb58c77a30de46ebfe1d0090199c29dabc0d
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lifecycle-image
+  namespace: kpack
+data:
+  image: gcr.io/cf-build-service-public/kpack/lifecycle@sha256:2b97f13bdf43d2f4e72b68f67dcb1b693c6bee10f76b709c09e46ae21ec265e8
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: completion-image
+  namespace: kpack
+data:
+  image: gcr.io/cf-build-service-public/kpack/completion@sha256:1e83c4ccb56ad3e0fccbac74f91dfc404db280f8d3380cfa20c7d68fd0359235
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -101,12 +153,12 @@ spec:
     metadata:
       labels:
         app: kpack-controller
-        version: 0.0.9-rc.41
+        version: 0.1.2-rc.1
     spec:
       serviceAccountName: controller
       containers:
       - name: controller
-        image: gcr.io/cf-build-service-public/kpack/controller@sha256:6677501fb8073ddc6c61c9fb4bfd1427eb43ce3a06f9fb522ca2aff348ae6c90
+        image: gcr.io/cf-build-service-public/kpack/controller@sha256:6a7fbb4d34a5ed778e75edc2a14b671afcbccaed1a37a4662708b7a11559734c
         env:
         - name: CONFIG_LOGGING_NAME
           value: config-logging
@@ -119,13 +171,25 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: BUILD_INIT_IMAGE
-          value: gcr.io/cf-build-service-public/kpack/build-init@sha256:386452ea690ed497b092977209079c3f310e6fdf94523387e517df97f7f64cb3
+          valueFrom:
+            configMapKeyRef:
+              name: build-init-image
+              key: image
         - name: REBASE_IMAGE
-          value: gcr.io/cf-build-service-public/kpack/rebase@sha256:61f91010e8b77eb6b0d28d69a417a7f597a3fb0d9b2d4e63980be3e64d76721e
+          valueFrom:
+            configMapKeyRef:
+              name: rebase-image
+              key: image
         - name: COMPLETION_IMAGE
-          value: gcr.io/cf-build-service-public/kpack/completion@sha256:de0f72cae50a8db095c6b97a17e7acc79004a5468b1d554b7cd2a9019e9cc807
+          valueFrom:
+            configMapKeyRef:
+              name: completion-image
+              key: image
         - name: LIFECYCLE_IMAGE
-          value: gcr.io/cf-build-service-public/kpack/lifecycle@sha256:8b0dea6d3ac03a2d4a2e6728e64ae0d6bf15bf619d4bfbe9ddd70e0fcd7909bc
+          valueFrom:
+            configMapKeyRef:
+              name: lifecycle-image
+              key: image
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -139,7 +203,7 @@ metadata:
   name: kpack-controller-admin
 rules:
 - apiGroups:
-  - build.pivotal.io
+  - kpack.io
   resources:
   - builds
   - builds/status
@@ -151,6 +215,10 @@ rules:
   - builders/status
   - clusterbuilders
   - clusterbuilders/status
+  - clusterstores
+  - clusterstores/status
+  - clusterstacks
+  - clusterstacks/status
   - sourceresolvers
   - sourceresolvers/status
   verbs:
@@ -185,25 +253,6 @@ rules:
   - create
   - update
   - delete
-  - watch
-- apiGroups:
-  - experimental.kpack.pivotal.io
-  resources:
-  - custombuilders
-  - custombuilders/status
-  - customclusterbuilders
-  - customclusterbuilders/status
-  - stores
-  - stores/status
-  - stacks
-  - stacks/status
-  verbs:
-  - get
-  - list
-  - create
-  - update
-  - delete
-  - patch
   - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -251,61 +300,9 @@ roleRef:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: custombuilders.experimental.kpack.pivotal.io
+  name: images.kpack.io
 spec:
-  group: experimental.kpack.pivotal.io
-  version: v1alpha1
-  names:
-    kind: CustomBuilder
-    singular: custombuilder
-    plural: custombuilders
-    shortNames:
-    - custmbldr
-    categories:
-    - kpack
-  scope: Namespaced
-  subresources:
-    status: {}
-  additionalPrinterColumns:
-  - name: LatestImage
-    type: string
-    JSONPath: .status.latestImage
-  - name: Ready
-    type: string
-    JSONPath: .status.conditions[?(@.type=="Ready")].status
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: customclusterbuilders.experimental.kpack.pivotal.io
-spec:
-  group: experimental.kpack.pivotal.io
-  version: v1alpha1
-  names:
-    kind: CustomClusterBuilder
-    singular: customclusterbuilder
-    plural: customclusterbuilders
-    shortNames:
-    - ccb
-    categories:
-    - kpack
-  scope: Cluster
-  subresources:
-    status: {}
-  additionalPrinterColumns:
-  - name: LatestImage
-    type: string
-    JSONPath: .status.latestImage
-  - name: Ready
-    type: string
-    JSONPath: .status.conditions[?(@.type=="Ready")].status
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: images.build.pivotal.io
-spec:
-  group: build.pivotal.io
+  group: kpack.io
   version: v1alpha1
   names:
     kind: Image
@@ -344,9 +341,9 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: sourceresolvers.build.pivotal.io
+  name: sourceresolvers.kpack.io
 spec:
-  group: build.pivotal.io
+  group: kpack.io
   version: v1alpha1
   names:
     kind: SourceResolver
@@ -365,35 +362,14 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: stacks.experimental.kpack.pivotal.io
+  name: clusterstacks.kpack.io
 spec:
-  group: experimental.kpack.pivotal.io
+  group: kpack.io
   version: v1alpha1
   names:
-    kind: Stack
-    singular: stack
-    plural: stacks
-    categories:
-    - kpack
-  scope: Cluster
-  subresources:
-    status: {}
-  additionalPrinterColumns:
-  - name: Ready
-    type: string
-    JSONPath: .status.conditions[?(@.type=="Ready")].status
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: stores.experimental.kpack.pivotal.io
-spec:
-  group: experimental.kpack.pivotal.io
-  version: v1alpha1
-  names:
-    kind: Store
-    singular: store
-    plural: stores
+    kind: ClusterStack
+    singular: clusterstack
+    plural: clusterstacks
     categories:
     - kpack
   scope: Cluster
@@ -407,7 +383,7 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: defaults.webhook.kpack.pivotal.io
+  name: defaults.webhook.kpack.io
 webhooks:
 - admissionReviewVersions:
   - v1beta1
@@ -417,12 +393,12 @@ webhooks:
       namespace: kpack
   failurePolicy: Fail
   sideEffects: None
-  name: defaults.webhook.kpack.pivotal.io
+  name: defaults.webhook.kpack.io
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: validation.webhook.kpack.pivotal.io
+  name: validation.webhook.kpack.io
 webhooks:
 - admissionReviewVersions:
   - v1beta1
@@ -432,7 +408,7 @@ webhooks:
       namespace: kpack
   failurePolicy: Fail
   sideEffects: None
-  name: validation.webhook.kpack.pivotal.io
+  name: validation.webhook.kpack.io
 ---
 apiVersion: v1
 kind: Secret
@@ -455,12 +431,12 @@ spec:
       labels:
         app: kpack-webhook
         role: webhook
-        version: 0.0.9-rc.41
+        version: 0.1.2-rc.1
     spec:
       serviceAccountName: webhook
       containers:
       - name: webhook
-        image: gcr.io/cf-build-service-public/kpack/webhook@sha256:b57ef8d30ad548de39ee7105fe9f783c02ab181c2b80ef68cbd9b7a0bc66ac44
+        image: gcr.io/cf-build-service-public/kpack/webhook@sha256:c51a7508908baacc7253c74b9d9a4f7384a62882005c0d7aabe59f9d43904233
         ports:
         - name: https-webhook
           containerPort: 8443
@@ -537,7 +513,7 @@ rules:
   resources:
   - mutatingwebhookconfigurations
   resourceNames:
-  - defaults.webhook.kpack.pivotal.io
+  - defaults.webhook.kpack.io
   verbs:
   - update
 - apiGroups:
@@ -553,7 +529,7 @@ rules:
   resources:
   - validatingwebhookconfigurations
   resourceNames:
-  - validation.webhook.kpack.pivotal.io
+  - validation.webhook.kpack.io
   verbs:
   - update
 - apiGroups:

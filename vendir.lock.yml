@@ -2,7 +2,7 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/jetstack/cert-manager/releases/29442438
+      url: https://api.github.com/repos/jetstack/cert-manager/releases/30572580
     path: upstream/cert-manager
   - manual: {}
     path: downstream
@@ -21,8 +21,8 @@ directories:
   path: k8s/eduk8s
 - contents:
   - git:
-      commitTitle: Update Contour Docker image to v1.7.0....
-      sha: c57014c9bf081485125ea538fe65eca580163072
+      commitTitle: Update Contour Docker image to v1.8.1....
+      sha: 3e34f4b6257a900aed23b96be7be36b7ac83d86b
     path: upstream/contour
   - git:
       commitTitle: 'Merge pull request #1706 from kubernetes-sigs/changelog-for-v0.7.3...'
@@ -35,13 +35,13 @@ directories:
   path: k8s/ingress
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/knative/serving/releases/28325061
+      url: https://api.github.com/repos/knative/serving/releases/30501734
     path: upstream/serving
   - githubRelease:
-      url: https://api.github.com/repos/knative-sandbox/net-contour/releases/28326148
+      url: https://api.github.com/repos/knative-sandbox/net-contour/releases/29840412
     path: upstream/net-contour
   - githubRelease:
-      url: https://api.github.com/repos/knative-sandbox/net-certmanager/releases/28326254
+      url: https://api.github.com/repos/knative-sandbox/net-certmanager/releases/30496739
     path: upstream/net-certmanager
   - manual: {}
     path: downstream
@@ -50,7 +50,7 @@ directories:
   path: k8s/knative
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/pivotal/kpack/releases/27343776
+      url: https://api.github.com/repos/pivotal/kpack/releases/30225354
     path: upstream/kpack
   - manual: {}
     path: downstream
@@ -81,7 +81,7 @@ directories:
       url: https://api.github.com/repos/tektoncd/triggers/releases/29172094
     path: upstream/triggers
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/dashboard/releases/29112372
+      url: https://api.github.com/repos/tektoncd/dashboard/releases/29995619
     path: upstream/dashboard
   - manual: {}
     path: downstream
@@ -90,8 +90,8 @@ directories:
   path: k8s/tekton
 - contents:
   - git:
-      commitTitle: include path in endpoint uniqueness
-      sha: 8c677ac392b34e1912da2d59485841fc349017dc
+      commitTitle: doc rcs
+      sha: 649ea341f49f3b3ad9934e98817e1f59788d6b41
     path: upstream/collector
   - git:
       commitTitle: bump proxy version
@@ -116,32 +116,32 @@ directories:
       sha: 256af0eebec7b4f1449110c9b5f39785c6030bde
     path: upstream/lab-image-security
   - git:
-      commitTitle: Wording changes in commentary.
-      sha: 18b50d50620205feaffc2e83e8bfb2ab4718e1e2
+      commitTitle: Fix typos and example output.
+      sha: a7fa036a58a689767526088f6d74cc6429e41b4c
     path: upstream/lab-k8s-fundamentals
   - git:
       commitTitle: Clarify that can click on any action block.
       sha: fd4557960ad5c59f92bca5a7d673cd2abc0d2e08
     path: upstream/lab-getting-started-with-octant
   - git:
-      commitTitle: Updated workshop reference
-      sha: 8872cdf91eca40be0c7413324c5f2ccf15d08346
+      commitTitle: Minor tweaks.
+      sha: 43760adceb6d034b7a53212f15f152e65a0d3668
     path: upstream/lab-getting-started-with-carvel
   - git:
-      commitTitle: Update details on building the application locally.
-      sha: 7958a6f66db1478d0126b9b9d1694a278fdd1d2b
+      commitTitle: Fix docker guide links.
+      sha: 4756b87ff094445850c3b993df27a285c21dd93b
     path: upstream/lab-spring-boot-k8s-getting-started
   - git:
-      commitTitle: More clarifications about application instances.
-      sha: 9a56949e82a3c8fecf6b9e9c251150a5be7d8430
+      commitTitle: Fix docker guide links.
+      sha: 3094d45dccd1c30b47240ec4201536a6d70c4dd0
     path: upstream/lab-spring-boot-k8s-probes
   - git:
-      commitTitle: Remove obsolete file.
-      sha: 6601010472e96c1644500f95c06e4e24a8287e96
+      commitTitle: Fix docker guide links.
+      sha: 2fb094170e0604f1720e3253db3bea43ddcd1e27
     path: upstream/lab-spring-boot-k8s-skaffold
   - git:
-      commitTitle: remove environment/request resources
-      sha: 3018f97a96bfacb28a7119348eab90824aa131ab
+      commitTitle: Update Dockerfile
+      sha: abd76ad3b86a723f568c17288a26739e916ddfa8
     path: upstream/lab-tekton-fundamentals
   - manual: {}
     path: downstream
