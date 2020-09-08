@@ -3,7 +3,8 @@
 domain:
 wildcard_domain:
 org: tanzu
-privileged_clusterrole_name:  #! In TMC clusters is: vmware-system-tmc-psp-privileged 
+privileged_clusterrole_name:  #! In TMC clusters is: vmware-system-tmc-psp-privileged
+cluster_type: tmc  #! Values are: tmc, tkg, minikube 
 
 aws_access_key_id: <FILL_YOUR_INFO>
 aws_secret_access_key: <FILL_YOUR_INFO>

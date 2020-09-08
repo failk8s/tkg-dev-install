@@ -1,0 +1,88 @@
+#@ load("@ytt:data", "data")
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kuard 
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kuard
+  namespace: kuard
+#@ if data.values.privileged_clusterrole_name:
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kuard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: #@ data.values.privileged_clusterrole_name
+subjects:
+- kind: ServiceAccount
+  name: kuard
+  namespace: kuard
+#@ end
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kuard
+  name: kuard
+  namespace: kuard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kuard
+  template:
+    metadata:
+      labels:
+        app: kuard
+    spec:
+      containers:
+      - image: gcr.io/kuar-demo/kuard-amd64:1
+        name: kuard
+      serviceAccountName: kuard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kuard
+  name: kuard
+  namespace: kuard
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: kuard
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kuard
+  labels:
+    app: kuard
+  namespace: kuard
+spec:
+  rules:
+  - host: #@ "kuard.{}".format(data.values.wildcard_domain)
+    http:
+      paths:
+      - backend:
+          serviceName: kuard
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - #@ "kuard.{}".format(data.values.wildcard_domain)
+    secretName: wildcard

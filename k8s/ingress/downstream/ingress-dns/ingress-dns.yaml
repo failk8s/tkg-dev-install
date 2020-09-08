@@ -1,0 +1,68 @@
+#@ load("@ytt:data", "data")
+
+#! https://github.com/kubernetes/minikube/tree/master/deploy/addons/ingress-dns
+
+#@ if data.values.cluster_type=="minikube":
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ingress-dns
+  namespace: #@ data.values.ingress.namespace
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: ingress-dns
+rules:
+  - apiGroups:
+      - ""
+      - "extensions"
+      - "networking.k8s.io"
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: ingress-dns
+  namespace: #@ data.values.ingress.namespace
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ingress-dns
+subjects:
+  - kind: ServiceAccount
+    name: ingress-dns
+    namespace: #@ data.values.ingress.namespace
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ingress-dns
+  namespace: #@ data.values.ingress.namespace
+  annotations:
+    kapp.k14s.io/update-strategy: always-replace
+spec:
+  serviceAccountName: ingress-dns
+  hostNetwork: true
+  containers:
+    - name: minikube-ingress-dns
+      image: "cryptexlabs/minikube-ingress-dns:0.2.1"
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: 53
+          protocol: UDP
+      env:
+        - name: DNS_PORT
+          value: "53"
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+---
+#@ end

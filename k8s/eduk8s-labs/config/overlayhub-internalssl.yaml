@@ -1,0 +1,5 @@
+#! https://developers.redhat.com/blog/2017/11/22/dynamically-creating-java-keystores-openshift/
+#! 
+#! The hub will not connect with the trainingportal through https because it needs to have the CA injected into the keystore
+#!
+#! TODO

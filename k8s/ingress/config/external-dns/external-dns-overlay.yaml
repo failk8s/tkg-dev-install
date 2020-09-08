@@ -4,8 +4,9 @@
 
 #@ d = data.values.domain or assert.fail("missing domain definition")
 #@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
-
 #@ viewer_sa = "{}-viewer".format(data.values.externaldns.name)
+
+#@ if data.values.cluster_type=="tmc": 
 
 #@overlay/match by=overlay.or_op(overlay.subset({"kind": "ServiceAccount"}), overlay.subset({"kind": "Deployment"})), expects="1+"
 ---
@@ -50,3 +51,14 @@ spec:
         - --registry=txt
         #! This is to identofy the owner of the txt records so that external-dns don't mess with existing records
         - #@ "--txt-owner-id={}".format(data.values.externaldns.owner) 
+
+#@ elif data.values.cluster_type=="minikube":
+
+#@ external_dns=overlay.subset({"metadata": {"name": "external-dns"}})
+#@ external_dns_viewer=overlay.subset({"metadata": {"name": "external-dns-viewer"}})
+
+#@overlay/match by=overlay.or_op(external_dns, external_dns_viewer),expects="1+"
+#@overlay/remove
+---
+
+#@ end

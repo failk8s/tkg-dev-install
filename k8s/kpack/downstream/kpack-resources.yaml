@@ -1,7 +1,7 @@
 #@ load("@ytt:data", "data")
 
 ---
-apiVersion: builds.kpack.io/v1alpha1
+apiVersion: kpack.io/v1alpha1
 kind: ClusterBuilder
 metadata:
   name: default

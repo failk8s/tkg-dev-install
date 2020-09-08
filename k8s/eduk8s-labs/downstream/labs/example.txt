@@ -1,0 +1,385 @@
+#@ load("@ytt:data", "data")
+
+#! Add a condition that if labs are to be deployed, then add these
+#! else add an overlay that will delete all TrainingPortal/Workshops
+---
+apiVersion: training.eduk8s.io/v1alpha1
+kind: SystemProfile
+metadata:
+  name: springone
+spec:
+  dockerd:
+    mirror:
+      remote: https://registry-1.docker.io
+      username: eduk8s
+      password: e2723bec-1fb7-4daf-bb21-1633d58ed9a8
+  analytics:
+    google:
+      trackingId: UA-168453928-1
+  environment:
+    secrets:
+      pull:
+      - eduk8s-registry-creds
+  ingress:
+    class: contour
+    domain: #@ data.values.wildcard_domain
+    secret: eduk8s-wildcard
+  storage:
+    group: 1
+  theme:
+    dashboard:
+      style: |
+        .no-scrolling {
+            background-color: #374141;
+        }
+        .btn-transparent {
+          color: white;
+        }
+        .navbar-content {
+          background-color: black
+          color: white
+        }
+        a.nav-link{
+            color: #80EA6E
+        }
+        a.nav-link:hover{
+          color: #02BC67
+            }
+        .nav-pills .nav-link.active {
+            color: black;
+            background-color: #80EA6E
+            ;
+        }
+        .gutter.gutter-vertical{
+          background-color:#374141
+        }
+        #startup-cover-panel {
+          position: fixed;
+          height: 100%;
+          width: 100%;
+          top: 0;
+          left: 0;
+          background: #374141;
+          z-index: 9999;
+          background-position: calc(100% - 25px) calc(100% - 25px);
+          background-repeat: no-repeat;
+          background-size: 75px;
+        }
+    workshop:
+      style: |
+        @font-face {
+          font-family: "Metropolis";
+          font-weight: normal;
+          font-weight: 300;
+          font-weight: 200;
+          font-weight: 100;
+          font-style: normal;
+          src: url("https://d1ophd2rlqbanb.cloudfront.net/fonts/WOFF2/Metropolis-Regular.woff2")
+              format("woff2"),
+            url("https://d1ophd2rlqbanb.cloudfront.net/fonts/WOFF/Metropolis-Regular.woff")
+              format("woff"),
+            url("https://d1ophd2rlqbanb.cloudfront.net/fonts/Truetype/Metropolis-Regular.ttf")
+              format("truetype");
+        }
+        @font-face {
+          font-family: "Metropolis";
+          font-weight: 500;
+          font-style: normal;
+          src: url("https://d1ophd2rlqbanb.cloudfront.net/fonts/WOFF2/Metropolis-SemiBold.woff2")
+              format("woff2"),
+            url("https://d1ophd2rlqbanb.cloudfront.net/fonts/WOFF/Metropolis-SemiBold.woff")
+              format("woff"),
+            url("https://d1ophd2rlqbanb.cloudfront.net/fonts/Truetype/Metropolis-SemiBold.ttf")
+              format("truetype");
+        }
+        @font-face {
+          font-family: "Metropolis";
+          font-weight: 600;
+          font-weight: 700;
+          font-weight: bold;
+          font-style: normal;
+          src: url("https://d1ophd2rlqbanb.cloudfront.net/fonts/WOFF2/Metropolis-Bold.woff2")
+              format("woff2"),
+            url("https://d1ophd2rlqbanb.cloudfront.net/fonts/WOFF/Metropolis-Bold.woff")
+              format("woff"),
+            url("https://d1ophd2rlqbanb.cloudfront.net/fonts/Truetype/Metropolis-Bold.ttf")
+              format("truetype");
+        }
+        body {
+          height: 100%;
+          font-family: "Metropolis", sans-serif;
+          font-weight: 300;
+          font-size: 100%;
+          overflow: hidden;
+          background-color: black;
+        }
+        a {
+          color: #80ea6e;
+        }
+        a:hover {
+          color: #02bc67;
+        }
+        .sticky-top {
+          background-color: black !important;
+        }
+        .btn-primary {
+          background-color: #80ea6e;
+          border-color: #80ea6e;
+          color: black;
+        }
+        .btn-primary:hover {
+          background-color: #02bc67;
+        }
+        .page-content {
+          padding: 15px;
+          margin: 4px 0px;
+          color: white;
+          background-color: black;
+          border: black;
+          -webkit-box-shadow: 0 1px 50px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 1px 50px rgba(0, 0, 0, 0.1);
+        }
+        .page-content .title {
+          margin: 0 0 30px 0;
+        }
+        .page-content h1,
+        .page-content h2,
+        .page-content h3,
+        .page-content h4,
+        .page-content h5,
+        .page-content h6 {
+          color: white;
+        }
+        .page-content p,
+        .page-content ul,
+        .page-content ol,
+        .page-content pre,
+        .page-content blockquote,
+        .page-content table,
+        .page-content iframe {
+          margin-bottom: 1em;
+        }
+        .page-content img {
+          display: block;
+          height: auto;
+          max-width: 100%;
+          padding: 15px;
+          margin: 15px 5px;
+          background: white;
+          border: 1px solid #d6d6d6;
+          border-radius: 4px;
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          box-sizing: border-box;
+        }
+        .page-content code {
+          color: #97ebf3;
+          background-color: #374141;
+        }
+        .page-content pre {
+          background: #374141;
+          border: 0;
+          padding: 6px;
+          white-space: pre-wrap;
+          word-break: keep-all;
+        }
+        .page-content pre code {
+          color: #97ebf3;
+        }
+        .page-content .page-meta {
+          margin-top: 25px;
+          font-size: 85%;
+          color: #999;
+        }
+        .page-content .page-meta a {
+          color: #999;
+          border-bottom: 1px dotted #999;
+        }
+        .page-content .page-meta a:hover {
+          color: #02bc67;
+          text-decoration: none;
+        }
+        span.editor_link {
+          color: #80ea6e !important;
+        }
+        span.editor_command_link {
+          color: #80ea6e !important;
+        }
+        body {
+          height: 100%;
+          font-family: "Metropolis", sans-serif;
+          font-weight: 300;
+          font-size: 90%;
+          overflow: hidden;
+          background-color: black;
+        }
+        a {
+          color: #80ea6e;
+        }
+        a:hover {
+          color: #02bc67;
+        }
+        .sticky-top {
+          background-color: black !important;
+        }
+        .btn-primary {
+          background-color: #80ea6e;
+          border-color: #80ea6e;
+          color: black;
+        }
+        .btn-primary:hover {
+          background-color: #02bc67;
+          border-color: #02bc67;
+          color: black;
+        }
+        .page-content {
+          padding: 15px;
+          margin: 4px 0px;
+          color: white;
+          background-color: black;
+          border: black;
+          -webkit-box-shadow: 0 1px 50px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 1px 50px rgba(0, 0, 0, 0.1);
+        }
+        .page-content .title {
+          margin: 0 0 30px 0;
+        }
+        .page-content h1,
+        .page-content h2,
+        .page-content h3,
+        .page-content h4,
+        .page-content h5,
+        .page-content h6 {
+          color: white;
+        }
+        .page-content p,
+        .page-content ul,
+        .page-content ol,
+        .page-content pre,
+        .page-content blockquote,
+        .page-content table,
+        .page-content iframe {
+          margin-bottom: 1em;
+        }
+        .page-content img {
+          display: block;
+          height: auto;
+          max-width: 100%;
+          padding: 15px;
+          margin: 15px 5px;
+          background: black;
+          border: 1px solid #d6d6d6;
+          border-radius: 4px;
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          box-sizing: border-box;
+        }
+        .page-content code {
+          color: #97ebf3;
+          background-color: #374141;
+        }
+        .page-content pre {
+          background: #374141;
+          border: 0;
+          padding: 6px;
+          white-space: pre-wrap;
+          word-break: keep-all;
+        }
+        .page-content pre code {
+          color: #97ebf3;
+        }
+        .page-content .page-meta a:hover {
+          color: #02bc67;
+          text-decoration: none;
+        }
+        span.editor_link {
+          color: #80ea6e !important;
+        }
+        span.editor_command_link {
+          color: #80ea6e !important;
+        }
+        div.magic-code-block-title {
+          background-color: #516060;
+        }
+        .page-content blockquote {
+          color: white;
+        }
+    portal:
+      style: |
+        #startup-cover-panel {
+          position: fixed;
+          height: 100%;
+          width: 100%;
+          top: 0;
+          left: 0;
+          background: #374141;
+          z-index: 9999;
+          background-position: calc(100% - 25px) calc(100% - 25px);
+          background-repeat: no-repeat;
+          background-size: 75px;
+        }
+
+---
+apiVersion: training.eduk8s.io/v1alpha1
+kind: TrainingPortal
+metadata:
+  name: springone
+spec:
+  system:
+    profile: springone
+  portal:
+    index: https://springone.io/2020/workshops#labs
+    theme:
+      frame:
+        ancestors:
+        - https://springone-2020-labs-staging.cfapps.io/
+        - https://springone-2020-production-green.cfapps.io/
+        - https://springone.io/
+    clients:
+      robot:
+        id: he110W0r1d
+        secret: r0b0ts3cr3t
+    credentials:
+      robot:
+        password: r0b0tp@ssw0rd
+        username: robot@eduk8s
+    registration:
+      enabled: false
+      type: one-step
+    sessions:
+      maximum: 100
+#!    initial: 1
+    reserved: 2
+    #! TODO: Adapt these values
+#!    capacity: 50
+  workshops:
+    - name: lab-k8s-fundamentals
+      expires: 60m
+      orphaned: 5m
+    - name: lab-container-basics
+      expires: 60m
+      orphaned: 5m
+    - name: lab-getting-started-with-octant
+      expires: 30m
+      orphaned: 5m
+    - name: lab-spring-boot-k8s-gs
+      expires: 30m
+      orphaned: 5m
+    - name: lab-spring-boot-k8s-probes
+      expires: 30m
+      orphaned: 5m
+    - name: lab-spring-boot-k8s-skaffold
+      expires: 30m
+      orphaned: 5m
+    - name: lab-microservice
+      expires: 30m
+      orphaned: 5m
+    - name: lab-spring-gateway
+      expires: 30m
+      orphaned: 5m
+    - name: lab-getting-started-with-carvel
+      expires: 45m
+      orphaned: 5m
+    - name: lab-tekton-fundamentals
+      expires: 60m
+      orphaned: 5m

@@ -1,7 +1,7 @@
 # See: https://github.com/k14s/vendir/blob/develop/docs/vendir-spec.md
 apiVersion: vendir.k14s.io/v1alpha1
 kind: Config
-minimumRequiredVersion: 0.8.0
+minimumRequiredVersion: 0.10.0
 directories:
 
 ##########
@@ -12,7 +12,7 @@ directories:
   - path: upstream/cert-manager
     githubRelease:
       slug: jetstack/cert-manager
-      tag: v1.0.0
+      tag: v1.0.1
       disableAutoChecksumValidation: true
     includePaths:
     - cert-manager.crds.yaml
@@ -167,6 +167,18 @@ directories:
     manual: {}
 
 ##########
+# testapp
+##########
+- path: k8s/testapp
+  contents:
+  - path: upstream
+    manual: {}
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}
+
+##########
 # wavefront
 ##########
 - path: k8s/wavefront
@@ -199,70 +211,60 @@ directories:
       url: https://github.com/eduk8s-labs/lab-container-basics
       ref: master
     includePaths:
-    - resources/training-portal.yaml
     - resources/workshop.yaml
   - path: upstream/lab-python-containers
     git:
       url: https://github.com/eduk8s-labs/lab-python-containers
       ref: master
     includePaths:
-    - resources/training-portal.yaml
     - resources/workshop.yaml
   - path: upstream/lab-image-security
     git:
       url: https://github.com/eduk8s-labs/lab-image-security
       ref: master
     includePaths:
-    - resources/training-portal.yaml
     - resources/workshop.yaml
   - path: upstream/lab-k8s-fundamentals
     git:
       url: https://github.com/eduk8s-labs/lab-k8s-fundamentals
       ref: master
     includePaths:
-    - resources/training-portal.yaml
     - resources/workshop.yaml
   - path: upstream/lab-getting-started-with-octant
     git:
       url: https://github.com/eduk8s-labs/lab-getting-started-with-octant
       ref: master
     includePaths:
-    - resources/training-portal.yaml
     - resources/workshop.yaml
   - path: upstream/lab-getting-started-with-carvel
     git:
       url: https://github.com/eduk8s-labs/lab-getting-started-with-carvel
       ref: master
     includePaths:
-    - resources/training-portal.yaml
     - resources/workshop.yaml
   - path: upstream/lab-spring-boot-k8s-getting-started
     git:
       url: https://github.com/eduk8s-labs/lab-spring-boot-k8s-getting-started
       ref: master
     includePaths:
-    - resources/training-portal.yaml
     - resources/workshop.yaml
   - path: upstream/lab-spring-boot-k8s-probes
     git:
       url: https://github.com/eduk8s-labs/lab-spring-boot-k8s-probes
       ref: master
     includePaths:
-    - resources/training-portal.yaml
     - resources/workshop.yaml
   - path: upstream/lab-spring-boot-k8s-skaffold
     git:
       url: https://github.com/eduk8s-labs/lab-spring-boot-k8s-skaffold
       ref: master
     includePaths:
-    - resources/training-portal.yaml
     - resources/workshop.yaml
   - path: upstream/lab-tekton-fundamentals
     git:
       url: https://github.com/eduk8s-tests/lab-tekton-fundamentals
       ref: master
     includePaths:
-    - resources/training-portal.yaml
     - resources/workshop.yaml
   - path: downstream
     manual: {}
