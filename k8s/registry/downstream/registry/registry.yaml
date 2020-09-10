@@ -9,7 +9,7 @@
 
 #@ def labels():
 app: #@ data.values.registry.name
-org: #@ data.values.org
+org: tanzu
 #@ end
 
 #@ registry_name = "{}.{}".format(data.values.registry.name, data.values.domain)

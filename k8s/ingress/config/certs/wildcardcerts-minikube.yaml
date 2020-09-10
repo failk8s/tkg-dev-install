@@ -1,0 +1,24 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:base64", "base64")
+#@ load("@ytt:assert", "assert")
+
+#@ d = data.values.domain or assert.fail("missing domain definition")
+#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
+
+#@ if data.values.cluster_type=="minikube" and not(data.values.wildcard_tls.crt and data.values.wildcard_tls.key):
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: wildcard
+  namespace: #@ data.values.ingress.namespace
+spec:
+  secretName: wildcard
+  issuerRef:
+    name: wildcard
+    kind: ClusterIssuer
+  dnsNames:
+  - #@ "*.{}".format(d)
+  - #@ "*.{}".format(w)
+---
+#@ end

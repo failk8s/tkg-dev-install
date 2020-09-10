@@ -1,0 +1,28 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:base64", "base64")
+#@ load("@ytt:assert", "assert")
+
+#@ if data.values.cluster_type=="minikube":
+
+#@ data.values.local_root_ca.crt or assert.fail("missing local_root_ca.crt definition")
+#@ data.values.local_root_ca.key or assert.fail("missing local_root_ca.key definition")
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: local-root-ca
+  namespace: cert-manager
+data:
+  tls.crt: #@ base64.encode(data.values.local_root_ca.crt)
+  tls.key: #@ base64.encode(data.values.local_root_ca.key)
+
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: wildcard
+spec:
+  ca:
+    secretName: local-root-ca
+---
+#@ end

@@ -1,0 +1,37 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:base64", "base64")
+
+#@ if data.values.cluster_type=="tmc":
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aws-route53-creds
+  namespace: cert-manager
+data:
+  aws-credentials: #@ base64.encode(data.values.aws_secret_access_key)
+
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: wildcard-lets-encrypt
+spec:
+  acme:
+    email: #@ data.values.certs.email
+    privateKeySecretRef:
+      name: eduk8s-wildcard-acme
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - dns01:
+        route53:
+          region: #@ data.values.certs.region
+          accessKeyID: #@ data.values.aws_access_key_id
+          secretAccessKeySecretRef:
+            name: aws-route53-creds
+            key: aws-credentials
+    - http01:
+        ingress:
+          class: #@ data.values.ingress.type
+---
+#@ end
