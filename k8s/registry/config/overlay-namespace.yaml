@@ -1,0 +1,7 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"metadata": {"namespace": "registry"}}), expects="0+"
+---
+metadata:
+  namespace: #@ data.values.ingress.namespace

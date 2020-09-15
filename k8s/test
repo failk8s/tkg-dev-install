@@ -4,4 +4,20 @@
 
 [ ! -d "$1" ] && echo "There's no module with that name" && exit 1
 
-ytt -f values.yaml -f override.test.yml -f $1/upstream -f $1/config -f $1/downstream --ignore-unknown-comments
+if [ ! -z $2 ]; then
+    ([ "$2" != "minikube" ] && [ "$2" != "tmc" ]) && echo "Flavour needs to be tmc or minikube" && exit 1
+    ytt -f values.yaml -f override.test-$2.yml -f $1/upstream -f $1/downstream -f $1/config --ignore-unknown-comments
+    echo ""
+    echo "Tested $2 config"
+    echo ""
+else
+    ytt -f values.yaml -f override.test-tmc.yml -f $1/upstream -f $1/downstream -f $1/config --ignore-unknown-comments
+    echo ""
+    echo "Tested tmc config"
+    echo ""
+    read  -n 1 -p "Press a key to continue with minikube"
+    ytt -f values.yaml -f override.test-minikube.yml -f $1/upstream -f $1/downstream -f $1/config --ignore-unknown-comments
+    echo ""
+    echo "Tested minikube config"
+    echo ""
+fi

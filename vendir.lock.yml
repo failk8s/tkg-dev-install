@@ -23,15 +23,31 @@ directories:
   - git:
       commitTitle: Update Contour Docker image to v1.8.1....
       sha: 3e34f4b6257a900aed23b96be7be36b7ac83d86b
-    path: upstream/contour
+    path: controller/upstream/contour
+  - manual: {}
+    path: controller/downstream
+  - manual: {}
+    path: controller/config
   - git:
       commitTitle: 'Merge pull request #1706 from kubernetes-sigs/changelog-for-v0.7.3...'
       sha: 3a61439cd116741012026036e166008993d0d0e7
-    path: upstream/external-dns
+    path: dns/upstream/external-dns
   - manual: {}
-    path: downstream
+    path: dns/downstream
   - manual: {}
-    path: config
+    path: dns/config
+  - manual: {}
+    path: certs/upstream
+  - manual: {}
+    path: certs/downstream
+  - manual: {}
+    path: certs/config
+  - manual: {}
+    path: secret-operator/upstream
+  - manual: {}
+    path: secret-operator/downstream
+  - manual: {}
+    path: secret-operator/config
   path: k8s/ingress
 - contents:
   - githubRelease:
@@ -75,10 +91,10 @@ directories:
   path: k8s/registry
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/pipeline/releases/29523427
+      url: https://api.github.com/repos/tektoncd/pipeline/releases/31156792
     path: upstream/pipeline
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/triggers/releases/29172094
+      url: https://api.github.com/repos/tektoncd/triggers/releases/31239982
     path: upstream/triggers
   - githubRelease:
       url: https://api.github.com/repos/tektoncd/dashboard/releases/29995619
@@ -88,6 +104,14 @@ directories:
   - manual: {}
     path: config
   path: k8s/tekton
+- contents:
+  - manual: {}
+    path: upstream
+  - manual: {}
+    path: downstream
+  - manual: {}
+    path: config
+  path: k8s/testapp
 - contents:
   - git:
       commitTitle: doc rcs
@@ -116,8 +140,9 @@ directories:
       sha: 256af0eebec7b4f1449110c9b5f39785c6030bde
     path: upstream/lab-image-security
   - git:
-      commitTitle: Fix typos and example output.
-      sha: a7fa036a58a689767526088f6d74cc6429e41b4c
+      commitTitle: Update to version 200913.044905.83bf660 of base environment workshop
+        image.
+      sha: 4ac33185fa62407d8b0734302950829c447c274c
     path: upstream/lab-k8s-fundamentals
   - git:
       commitTitle: Clarify that can click on any action block.

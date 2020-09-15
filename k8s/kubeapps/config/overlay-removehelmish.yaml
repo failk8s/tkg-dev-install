@@ -1,0 +1,45 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.subset({"metadata": {"annotations": { "helm.sh/hook": "pre-install"}}}),expects="1+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  annotations:
+    #@overlay/match missing_ok=True
+    kapp.k14s.io/change-group: pre-install
+
+#@overlay/match by=overlay.subset({"metadata": {"annotations": { "helm.sh/hook": "post-install"}}}),expects="1+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  annotations:
+    #@overlay/match missing_ok=True
+    kapp.k14s.io/change-group: post-install
+
+#@overlay/match by=overlay.subset({"metadata": {"annotations": { "helm.sh/hook": "post-delete"}}}),expects="1+"
+#@overlay/remove
+---
+#!metadata:
+#!  #@overlay/match missing_ok=True
+#!  annotations:
+#!    #@overlay/match missing_ok=True
+#!    kapp.k14s.io/change-group: post-delete
+
+#@overlay/match by=overlay.subset({"metadata": {"annotations": { "helm.sh/hook": "test-success"}}}),expects="1+"
+#@overlay/remove
+---
+#!metadata:
+#!  #@overlay/match missing_ok=True
+#!  annotations:
+#!    #@overlay/match missing_ok=True
+#!    kapp.k14s.io/change-group: test-success
+
+#@overlay/match by=overlay.subset({"metadata": {"annotations": { "helm.sh/hook": "post-upgrade"}}}),expects="1+"
+#@overlay/remove
+---
+#!metadata:
+#!  #@overlay/match missing_ok=True
+#!  annotations:
+#!    #@overlay/match missing_ok=True
+#!    kapp.k14s.io/change-group: post-upgrade

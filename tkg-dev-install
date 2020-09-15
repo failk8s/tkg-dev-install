@@ -10,8 +10,14 @@ declare -A steps
 steps['cert-manager.1.name']='cert-manager'
 steps['cert-manager.1.path']='k8s/cert-manager'
 #
-steps["ingress.1.name"]="ingress"
-steps["ingress.1.path"]="k8s/ingress"
+steps["ingress.1.name"]="ingress-controller"
+steps["ingress.1.path"]="k8s/ingress/controller"
+steps["ingress.2.name"]="ingress-dns"
+steps["ingress.2.path"]="k8s/ingress/dns"
+steps["ingress.3.name"]="ingress-certs"
+steps["ingress.3.path"]="k8s/ingress/certs"
+steps["ingress.4.name"]="ingress-secret-operator"
+steps["ingress.4.path"]="k8s/ingress/secret-operator"
 #
 steps["knative.1.name"]="knative"
 steps["knative.1.path"]="k8s/knative"
@@ -104,8 +110,8 @@ function install_command {
     kubeconfig=" --kubeconfig $KUBECONFIG_FILE"
   fi
 
-  echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/config -f ${WORK_DIR}/$path/downstream ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default ${kubeconfig} -y -f -"
-  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/config -f ${WORK_DIR}/$path/downstream ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default ${kubeconfig} -y -f -
+  echo "ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/downstream -f ${WORK_DIR}/$path/config ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default ${kubeconfig} -y -f -"
+  ytt -f ${WORK_DIR}/k8s/values.yaml ${file_opt} -f ${WORK_DIR}/$path/upstream -f ${WORK_DIR}/$path/downstream -f ${WORK_DIR}/$path/config ${overlay_opt} --ignore-unknown-comments | kapp deploy -a $app_name --diff-changes -n default ${kubeconfig} -y -f -
 }
 
 #

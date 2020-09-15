@@ -1,0 +1,25 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:assert", "assert")
+
+#@ d = data.values.domain or assert.fail("missing domain definition")
+#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
+
+#@overlay/match by=overlay.subset({"kind":"Ingress", "metadata": {"name": "registry"}})
+---
+metadata:
+  #@overlay/match missing_ok=True
+  annotations:
+    #@overlay/match missing_ok=True
+    kubernetes.io/ingress.class: #@ data.values.ingress.type
+    #@overlay/match missing_ok=True
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+spec:
+  rules:
+  #@overlay/match by=overlay.index(0)
+  - host: #@ "registry.{}".format(d)
+  #@overlay/match missing_ok=True
+  tls:
+  - hosts:
+    - #@ "registry.{}".format(d)
+    secretName: wildcard

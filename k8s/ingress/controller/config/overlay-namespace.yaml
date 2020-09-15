@@ -1,0 +1,32 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind":"Namespace", "metadata":{"name": "projectcontour"}})
+#@overlay/remove
+---
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: #@ data.values.ingress.namespace
+
+#@overlay/match by=overlay.subset({"metadata": {"namespace": "projectcontour"}}), expects="1+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.ingress.namespace
+
+#@overlay/match by=overlay.subset({"kind":"RoleBinding"}),expects=[1,2]
+---
+subjects:
+#@overlay/match by=overlay.all
+- kind: ServiceAccount
+  namespace: #@ data.values.ingress.namespace
+
+#@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata": {"name": "contour"}})
+---
+subjects:
+#@overlay/match by=overlay.all
+- kind: ServiceAccount
+  namespace: #@ data.values.ingress.namespace

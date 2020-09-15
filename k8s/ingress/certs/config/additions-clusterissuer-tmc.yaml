@@ -9,7 +9,7 @@ metadata:
   name: aws-route53-creds
   namespace: cert-manager
 data:
-  aws-credentials: #@ base64.encode(data.values.aws_secret_access_key)
+  aws-credentials: #@ base64.encode(data.values.aws.secret_access_key)
 
 ---
 apiVersion: cert-manager.io/v1alpha2
@@ -18,15 +18,15 @@ metadata:
   name: wildcard-lets-encrypt
 spec:
   acme:
-    email: #@ data.values.certs.email
+    email: #@ data.values.aws.certs.email
     privateKeySecretRef:
       name: eduk8s-wildcard-acme
     server: https://acme-v02.api.letsencrypt.org/directory
     solvers:
     - dns01:
         route53:
-          region: #@ data.values.certs.region
-          accessKeyID: #@ data.values.aws_access_key_id
+          region: #@ data.values.aws.certs.region
+          accessKeyID: #@ data.values.aws.access_key_id
           secretAccessKeySecretRef:
             name: aws-route53-creds
             key: aws-credentials

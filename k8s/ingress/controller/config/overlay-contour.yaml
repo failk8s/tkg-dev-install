@@ -1,44 +1,5 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
-#@ load("@ytt:assert", "assert")
-
-#@ d = data.values.domain or assert.fail("missing domain definition")
-#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
-#@ t = data.values.ingress.type or assert.fail("Ingress type needs to be specified")
-
-#@overlay/match by=overlay.or_op(overlay.subset({"kind": "ServiceAccount"}), overlay.subset({"kind": "ConfigMap"}), overlay.subset({"kind": "Service"}), overlay.subset({"kind": "Role"}), overlay.subset({"kind": "RoleBinding"}), overlay.subset({"kind": "Job"}), overlay.subset({"kind": "Deployment"}), overlay.subset({"kind": "ServiceAccount"}), overlay.subset({"kind": "DaemonSet"}),), expects="1+"
----
-metadata:
-  #@overlay/match missing_ok=True
-  namespace: #@ data.values.ingress.namespace
-
-#@overlay/match by=overlay.subset({"kind":"Namespace", "metadata":{"name": "projectcontour"}})
-#@overlay/remove
----
-
-#@overlay/match by=overlay.subset({"kind":"RoleBinding", "metadata": {"name": "contour"}})
----
-subjects:
-#@overlay/match by=overlay.map_key("name")
-- kind: ServiceAccount
-  name: contour-certgen
-  namespace: #@ data.values.ingress.namespace
-
-#@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata": {"name": "contour"}})
----
-subjects:
-#@overlay/match by=overlay.map_key("name")
-- kind: ServiceAccount
-  name: contour
-  namespace: #@ data.values.ingress.namespace
-
-#@overlay/match by=overlay.subset({"kind":"RoleBinding", "metadata": {"name": "envoy-privileged"}}), missing_ok=True
----
-subjects:
-#@overlay/match by=overlay.map_key("name")
-- kind: ServiceAccount
-  name: envoy
-  namespace: #@ data.values.ingress.namespace
 
 #@overlay/match by=overlay.subset({"kind":"Service", "metadata": {"name": "envoy"}})
 ---

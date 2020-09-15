@@ -2,10 +2,11 @@
 #@ load("@ytt:base64", "base64")
 #@ load("@ytt:assert", "assert")
 
+#@ if data.values.cluster_type=="minikube" and not(data.values.provided.wildcard_tls.crt and data.values.provided.wildcard_tls.key):
+
 #@ d = data.values.domain or assert.fail("missing domain definition")
 #@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
 
-#@ if data.values.cluster_type=="tmc" and not(data.values.wildcard_tls.crt and data.values.wildcard_tls.key):
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
@@ -15,9 +16,10 @@ metadata:
 spec:
   secretName: wildcard
   issuerRef:
-    name: wildcard-lets-encrypt
+    name: wildcard
     kind: ClusterIssuer
   dnsNames:
   - #@ "*.{}".format(d)
   - #@ "*.{}".format(w)
+---
 #@ end

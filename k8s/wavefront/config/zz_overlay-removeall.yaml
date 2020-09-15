@@ -1,0 +1,18 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@ if data.values.wavefront.install==True:
+
+#! Add dummy cm
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dummy-wavefront
+  namespace: default
+
+#@overlay/match by=overlay.not_op(overlay.subset({"metadata": {"name": "dummy-wavefront"}})),expects="1+"
+#@overlay/remove
+---
+
+#@ end

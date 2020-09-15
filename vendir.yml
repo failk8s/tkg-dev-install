@@ -44,21 +44,40 @@ directories:
 ##########
 - path: k8s/ingress
   contents:
-  - path: upstream/contour
+  - path: controller/upstream/contour
     git:
       url: https://github.com/projectcontour/contour
       ref: v1.8.1
     includePaths:
     - examples/contour/**/*
-  - path: upstream/external-dns
+  - path: controller/downstream
+    manual: {}
+  - path: controller/config
+    manual: {}
+#
+  - path: dns/upstream/external-dns
     git:
       url: https://github.com/kubernetes-sigs/external-dns
       ref: v0.7.3
     includePaths:
     - kustomize/external-dns-*
-  - path: downstream
+  - path: dns/downstream
     manual: {}
-  - path: config
+  - path: dns/config
+    manual: {}
+#
+  - path: certs/upstream
+    manual: {}
+  - path: certs/downstream
+    manual: {}
+  - path: certs/config
+    manual: {}
+#
+  - path: secret-operator/upstream
+    manual: {}
+  - path: secret-operator/downstream
+    manual: {}
+  - path: secret-operator/config
     manual: {}
 
 ##########
@@ -143,14 +162,14 @@ directories:
   - path: upstream/pipeline
     githubRelease:
       slug: tektoncd/pipeline
-      tag: v0.15.2
+      tag: v0.16.1
       disableAutoChecksumValidation: true
     includePaths:
     - release.yaml
   - path: upstream/triggers
     githubRelease:
       slug: tektoncd/triggers
-      tag: v0.7.0
+      tag: v0.8.1
       disableAutoChecksumValidation: true
     includePaths:
     - release.yaml

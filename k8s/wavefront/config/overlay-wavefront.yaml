@@ -2,6 +2,8 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:assert", "assert")
 
+#@ if data.values.wavefront.install==True:
+
 #! Validation for required parameters
 #@ d = data.values.domain or assert.fail("missing domain definition")
 #@ c = data.values.wavefront.uri or assert.fail("missing wavefront uri definition")
@@ -420,3 +422,4 @@ data:
           - 'kube.coredns.coredns.dns.response.size.bytes'
           - 'kube.coredns.process.*'
 ---
+#@ end

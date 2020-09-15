@@ -1,39 +1,4 @@
 #@ load("@ytt:data", "data")
-
----
-apiVersion: failk8s.dev/v1alpha1
-kind: SecretCopierConfig
-metadata:
-  name: eduk8s-wildcard
-spec:
-  rules:
-  - sourceSecret:
-      name: wildcard
-      namespace: #@ data.values.ingress.namespace
-    targetSecret:
-      name: #@ data.values.eduk8s.wildcard
-    targetNamespaces:
-      nameSelector:
-        matchNames:
-        - #@ data.values.eduk8s.namespace
-
----
-apiVersion: failk8s.dev/v1alpha1
-kind: SecretCopierConfig
-metadata:
-  name: eduk8s-registry-creds
-spec:
-  rules:
-  - sourceSecret:
-      name: #@ "{}-creds".format(data.values.registry.name)
-      namespace: #@ data.values.registry.namespace
-    targetSecret:
-      name: #@ "eduk8s-{}-creds".format(data.values.registry.name)
-    targetNamespaces:
-      nameSelector:
-        matchNames:
-        - #@ data.values.eduk8s.namespace
-
 ---
 #! Docs: https://docs.eduk8s.io/en/latest/runtime-environment/system-profile.html
 apiVersion: training.eduk8s.io/v1alpha1

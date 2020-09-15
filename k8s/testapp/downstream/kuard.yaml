@@ -75,7 +75,7 @@ metadata:
   namespace: kuard
 spec:
   rules:
-  - host: #@ "kuard.{}".format(data.values.wildcard_domain)
+  - host: myapp.minikube.test #! @ "kuard.{}".format(data.values.wildcard_domain)
     http:
       paths:
       - backend:
@@ -84,5 +84,5 @@ spec:
         path: /
   tls:
   - hosts:
-    - #@ "kuard.{}".format(data.values.wildcard_domain)
+    - myapp.minikube.test #! @ "kuard.{}".format(data.values.wildcard_domain)
     secretName: wildcard

@@ -1,0 +1,31 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@  sa=overlay.subset({"kind": "ServiceAccount"})
+#@  cm=overlay.subset({"kind": "ConfigMap"})
+#@  svc=overlay.subset({"kind": "Service"})
+#@  role=overlay.subset({"kind": "Role"})
+#@  rb=overlay.subset({"kind": "RoleBinding"})
+#@  job=overlay.subset({"kind": "Job"})
+#@  pod=overlay.subset({"kind": "Pod"})
+#@  deploy=overlay.subset({"kind": "Deployment"})
+#@  secret=overlay.subset({"kind": "Secret"})
+#@  ss=overlay.subset({"kind": "StatefulSet"})
+#@  apprepo=overlay.subset({"kind": "AppRepository"})
+
+
+#@ if data.values.kubeapps.namespace != data.values.ingress.namespace:
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: #@ data.values.kubeapps.namespace
+---
+#@ end
+
+
+#@overlay/match by=overlay.or_op(sa,secret,role,rb,pod,job,apprepo,cm,svc,deploy,ss), expects="1+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.kubeapps.namespace

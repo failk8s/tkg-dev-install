@@ -1,0 +1,15 @@
+#@data/values
+---
+domain: test.com
+wildcard_domain: apps.test.com
+cluster_type: minikube
+local:
+  root_ca:
+    key: |
+      -----BEGIN CERTIFICATE-----
+      ABCD
+      -----END CERTIFICATE----- 
+    crt: |
+      -----BEGIN RSA PRIVATE KEY-----
+      1234ABCD
+      -----END RSA PRIVATE KEY-----

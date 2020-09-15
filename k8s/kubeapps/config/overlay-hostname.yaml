@@ -1,0 +1,33 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
+
+#@ d = data.values.domain or assert.fail("missing domain definition")
+#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kubeapps
+  namespace: kubeapps
+spec:
+  rules:
+  - host: $DASHBOARD_URL
+    http:
+      paths:
+      - backend:
+          serviceName: kubeapps
+          servicePort: 80
+
+#@overlay/match by=overlay.subset({"kind":"Ingress", "metadata": {"name": "kubeapps"}})
+---
+spec:
+  rules:
+  #@overlay/match by=overlay.index(0)
+  - host: #@ "kubeapps.{}".format(d)
+  #@overlay/match missing_ok=True
+  tls:
+  - hosts:
+    - #@ "kubeapps.{}".format(d)
+    secretName: wildcard

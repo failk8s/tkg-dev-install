@@ -1,0 +1,142 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: registry-config
+  namespace: registry
+type: Opaque
+data:
+  htpasswd: YWRtaW4K
+  haSharedSecret: c2VjcmV0Cg==
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: registry-config
+  namespace: registry
+data:
+  config.yml: |-
+    health:
+      storagedriver:
+        enabled: true
+        interval: 10s
+        threshold: 3
+    http:
+      addr: :5000
+      headers:
+        X-Content-Type-Options:
+        - nosniff
+    log:
+      fields:
+        service: registry
+    storage:
+      cache:
+        blobdescriptor: inmemory
+    version: 0.1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: registry
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      protocol: TCP
+      name: registry
+      targetPort: 5000
+  selector:
+    app: registry
+    release: registry
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+  namespace: registry
+spec:
+  selector:
+    matchLabels:
+      app: registry
+      release: registry
+  replicas: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: registry
+        release: registry
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      containers:
+        - name: registry
+          image: "registry:2.7.1"
+          imagePullPolicy: IfNotPresent
+          command:
+          - /bin/registry
+          - serve
+          - /etc/docker/registry/config.yml
+          ports:
+            - containerPort: 5000
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+          resources:
+            {}
+          env:
+            - name: REGISTRY_AUTH
+              value: "htpasswd"
+            - name: REGISTRY_AUTH_HTPASSWD_REALM
+              value: "Registry Realm"
+            - name: REGISTRY_AUTH_HTPASSWD_PATH
+              value: "/auth/htpasswd"
+            - name: REGISTRY_HTTP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: registry-config
+                  key: haSharedSecret
+            - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+              value: "/var/lib/registry"
+          volumeMounts:
+            - name: auth
+              mountPath: /auth
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/registry/
+            - name: registry-config
+              mountPath: "/etc/docker/registry"
+      volumes:
+        - name: auth
+          secret:
+            secretName: registry-config
+            items:
+            - key: htpasswd
+              path: htpasswd
+        - name: data
+          emptyDir: {}
+        - name: registry-config
+          configMap:
+            name: registry-config
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: registry
+  namespace: registry
+spec:
+  rules:
+  - host: HOST
+    http:
+      paths:
+      - backend:
+          serviceName: registry
+          servicePort: 5000
+        path: /
