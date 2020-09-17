@@ -1,0 +1,18 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:assert", "assert")
+
+#@ d = data.values.domain or assert.fail("missing domain definition")
+#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
+
+#@overlay/match by=overlay.subset({"kind":"Ingress", "metadata": {"name": "testapp"}})
+---
+spec:
+  rules:
+  #@overlay/match by=overlay.index(0)
+  - host: #@ "testapp.{}".format(w)
+  #@overlay/match missing_ok=True
+  tls:
+  - hosts:
+    - #@ "testapp.{}".format(w)
+    secretName: wildcard
