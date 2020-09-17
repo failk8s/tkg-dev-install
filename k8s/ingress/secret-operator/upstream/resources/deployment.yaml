@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: failk8s-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: failk8s-operator
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        deployment: failk8s-operator
+    spec:
+      serviceAccountName: failk8s-operator
+      containers:
+      - name: operator
+        image: quay.io/failk8s/failk8s-operator:latest
+        imagePullPolicy: Always

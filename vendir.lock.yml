@@ -42,7 +42,9 @@ directories:
     path: certs/downstream
   - manual: {}
     path: certs/config
-  - manual: {}
+  - git:
+      commitTitle: Wrong call for in cluster initialisation.
+      sha: 6c792b9328ebf0fdc6ae3e1f77a94cdbc18a92fc
     path: secret-operator/upstream
   - manual: {}
     path: secret-operator/downstream
