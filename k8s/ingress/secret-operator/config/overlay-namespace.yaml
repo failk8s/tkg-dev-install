@@ -1,0 +1,26 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind":"Namespace", "metadata":{"name": "secretcopierconfig"}}), expects="0+"
+#@overlay/remove
+---
+
+#@overlay/match by=overlay.subset({"kind":"Deployment","metadata": {"name": "failk8s-operator"}})
+---
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.ingress.namespace
+
+#@overlay/match by=overlay.subset({"kind":"ServiceAccount","metadata": {"name": "failk8s-operator"}})
+---
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.ingress.namespace
+
+#@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata": {"name": "failk8s-operators"}})
+---
+subjects:
+#@overlay/match by=overlay.all
+- kind: ServiceAccount
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.ingress.namespace

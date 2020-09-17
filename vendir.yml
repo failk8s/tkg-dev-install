@@ -74,7 +74,13 @@ directories:
     manual: {}
 #
   - path: secret-operator/upstream
-    manual: {}
+    git:
+      url: https://github.com/failk8s/failk8s-operator
+      ref: master
+    includePaths:
+    - resources/*
+    - secret_copier/resources/*
+    - secret_injector/resources/*
   - path: secret-operator/downstream
     manual: {}
   - path: secret-operator/config
