@@ -40,3 +40,6 @@ spec:
     - name: lab-tekton-fundamentals
       expires: 60m
       orphaned: 5m
+    - name: lab-kubeapps-testing
+      expires: 30m
+      orphaned: 5m

@@ -170,6 +170,10 @@ directories:
       commitTitle: Update Dockerfile
       sha: abd76ad3b86a723f568c17288a26739e916ddfa8
     path: upstream/lab-tekton-fundamentals
+  - git:
+      commitTitle: Update repository name.
+      sha: f695f13b523a0ca2a5b52a17f53605f1cb788b4a
+    path: upstream/lab-kubeapps-testing
   - manual: {}
     path: downstream
   - manual: {}

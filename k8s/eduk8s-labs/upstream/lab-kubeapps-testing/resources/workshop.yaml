@@ -1,0 +1,62 @@
+apiVersion: training.eduk8s.io/v1alpha2
+kind: Workshop
+metadata:
+  name: lab-kubeapps-testing
+spec:
+  title: Kubeapps Testing
+  description: Workshop environment for testing Kubeapps
+  vendor: eduk8s.io
+  difficulty: beginner
+  duration: 60m
+  url: https://github.com/eduk8s-tests/lab-kubeapps-testing
+  content:
+    files: github.com/eduk8s-tests/lab-kubeapps-testing
+  session:
+    namespaces:
+      budget: medium
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      console:
+        enabled: true
+        vendor: octant
+      editor:
+        enabled: true
+    dashboards:
+    - name: Kubeapps
+      url: $(ingress_protocol)://$(session_namespace)-kubeapps.$(ingress_domain)/#/c/default/ns/$(session_namespace)/apps
+    ingresses:
+    - name: kubeapps
+      host: kubeapps.kubeapps.svc.cluster.local
+      port: 0
+      headers:
+      - name: Authorization
+        value: Bearer $(kubernetes_token)
+    objects:
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: kubeapps-user
+      rules:
+      - apiGroups:
+        - kubeapps.com
+        resources:
+        - apprepositories
+        verbs:
+        - create
+        - delete
+        - get
+        - list
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: kubeapps-user
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: kubeapps-user
+      subjects:
+      - kind: ServiceAccount
+        namespace: $(workshop_namespace)
+        name: $(service_account)

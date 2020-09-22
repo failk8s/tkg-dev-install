@@ -291,6 +291,12 @@ directories:
       ref: master
     includePaths:
     - resources/workshop.yaml
+  - path: upstream/lab-kubeapps-testing
+    git:
+      url: https://github.com/eduk8s-tests/lab-kubeapps-testing
+      ref: master
+    includePaths:
+    - resources/workshop.yaml
   - path: downstream
     manual: {}
   - path: config
