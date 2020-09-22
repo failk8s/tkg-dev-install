@@ -1,0 +1,11 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
+#@ load("@ytt:overlay", "overlay")
+
+#@ if/end data.values.eduk8s.initial_capacity!=0:
+#@overlay/match by=overlay.subset({"kind":"TrainingPortal", "metadata" : { "name": "eduk8s-labs"}})
+---
+spec:
+  portal:
+    reserved: 1 
+    initial: #@ data.values.eduk8s.initial_capacity

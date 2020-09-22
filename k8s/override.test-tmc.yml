@@ -7,6 +7,8 @@ aws:
   access_key_id: ABCDEFGHIJKLM
   secret_access_key: abABC1ABA1B1B2c/ABc3ABc/AbcdEFgHIJkl2abC
 cluster_type: tmc
+eduk8s:
+  initial_capacity: 2
 wavefront:
   uri: https://vmware.wavefront.com
   api_token:  API_TOKEN

@@ -13,7 +13,7 @@ spec:
   environment:
     secrets:
       pull:
-      - #@ "eduk8s-{}-creds".format(data.values.registry.name)
+      - eduk8s-registry-creds
   storage:
     #@ if/end data.values.privileged_clusterrole_name:
     group: 1

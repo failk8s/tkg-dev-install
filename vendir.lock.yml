@@ -11,8 +11,8 @@ directories:
   path: k8s/cert-manager
 - contents:
   - git:
-      commitTitle: Update to version 200829.075640.cd9cfa4 of eduk8s operator.
-      sha: 99e234080954556af3206525d1b9ace5c781da24
+      commitTitle: Update to version 200921.055522.7cb980e of eduk8s operator.
+      sha: dd3049d2cb9275fccfa6a89749257b97cb92f9ed
     path: upstream/eduk8s
   - manual: {}
     path: downstream
@@ -93,13 +93,13 @@ directories:
   path: k8s/registry
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/pipeline/releases/31156792
+      url: https://api.github.com/repos/tektoncd/pipeline/releases/27474766
     path: upstream/pipeline
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/triggers/releases/31239982
+      url: https://api.github.com/repos/tektoncd/triggers/releases/27878559
     path: upstream/triggers
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/dashboard/releases/29995619
+      url: https://api.github.com/repos/tektoncd/dashboard/releases/28065648
     path: upstream/dashboard
   - manual: {}
     path: downstream
@@ -142,9 +142,9 @@ directories:
       sha: 256af0eebec7b4f1449110c9b5f39785c6030bde
     path: upstream/lab-image-security
   - git:
-      commitTitle: Update to version 200913.044905.83bf660 of base environment workshop
+      commitTitle: Update to version 200921.043323.ed97b3a of base environment workshop
         image.
-      sha: 4ac33185fa62407d8b0734302950829c447c274c
+      sha: 1d870f4d8db77447010fe1571c75866f940cf1cf
     path: upstream/lab-k8s-fundamentals
   - git:
       commitTitle: Clarify that can click on any action block.

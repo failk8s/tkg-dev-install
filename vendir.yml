@@ -30,7 +30,7 @@ directories:
   - path: upstream/eduk8s
     git:
       url: https://github.com/eduk8s/eduk8s
-      ref: 20.08.29.2
+      ref: 20.09.21.1
     includePaths:
     - resources/crds-v1/**/*
     - resources/operator/**/*
@@ -168,21 +168,21 @@ directories:
   - path: upstream/pipeline
     githubRelease:
       slug: tektoncd/pipeline
-      tag: v0.16.1
+      tag: v0.13.2 #! v0.16.1
       disableAutoChecksumValidation: true
     includePaths:
     - release.yaml
   - path: upstream/triggers
     githubRelease:
       slug: tektoncd/triggers
-      tag: v0.8.1
+      tag: v0.6.0 #! v0.8.1
       disableAutoChecksumValidation: true
     includePaths:
     - release.yaml
   - path: upstream/dashboard
     githubRelease:
       slug: tektoncd/dashboard
-      tag: v0.9.0
+      tag: v0.7.1 #! v0.9.0
       disableAutoChecksumValidation: true
     includePaths:
     - tekton-dashboard-release.yaml
