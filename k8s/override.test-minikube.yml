@@ -3,6 +3,8 @@
 domain: test.com
 wildcard_domain: apps.test.com
 cluster_type: minikube
+wavefront:
+  install: False
 local:
   root_ca:
     key: |

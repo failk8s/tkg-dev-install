@@ -21,10 +21,10 @@ kind: ServiceAccount
 metadata:
   name: kubeapps-internal-apprepository-controller
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -36,10 +36,10 @@ kind: ServiceAccount
 metadata:
   name: kubeapps-internal-apprepository-job-postupgrade
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -51,10 +51,10 @@ kind: ServiceAccount
 metadata:
   name: kubeapps-internal-kubeops
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -66,10 +66,10 @@ kind: ConfigMap
 metadata:
   name: kubeapps-internal-dashboard-config
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -78,6 +78,7 @@ data:
   vhost.conf: |-
     server {
       listen 8080;
+      large_client_header_buffers 4 32k;
       server_name _;
 
       gzip on;
@@ -108,12 +109,12 @@ data:
     {
       "kubeappsCluster": "default",
       "kubeappsNamespace": "kubeapps",
-      "appVersion": "v1.11.3",
+      "appVersion": "v2.0.0-beta.2",
       "authProxyEnabled": false,
       "oauthLoginURI": "/oauth2/start",
       "oauthLogoutURI": "/oauth2/sign_out",
-      "featureFlags": {"invalidateCache":true,"operators":false,"ui":"hex"},
-      "clusters": []
+      "featureFlags": {"invalidateCache":true,"ui":"clarity"},
+      "clusters": ["default"]
     }
 ---
 # Source: kubeapps/templates/kubeapps-frontend-config.yaml
@@ -122,10 +123,10 @@ kind: ConfigMap
 metadata:
   name: kubeapps-frontend-config
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -156,6 +157,7 @@ data:
 
     server {
       listen 8080;
+      large_client_header_buffers 4 32k;
       server_name _;
 
       location /healthz {
@@ -164,17 +166,15 @@ data:
         return 200 "healthy\n";
       }
 
-      # The default cluster running on the same cluster as Kubeapps.
+      # Ensure each cluster can be reached (should only be
+      # used with an auth-proxy where k8s credentials never leave
+      # the cluster). See clusters option.
       location ~* /api/clusters/default {
         rewrite /api/clusters/default/(.*) /$1 break;
         rewrite /api/clusters/default / break;
         proxy_pass https://kubernetes.default;
         include "./server_blocks/k8s-api-proxy.conf";
       }
-
-      # Ensure each additional cluster can be reached (should only be
-      # used with an auth-proxy where k8s credentials never leave
-      # the cluster). See clusters option.
 
       # TODO: The following location is left for backwards compat but will no longer
       # be needed once clients are sending the cluster name.
@@ -219,6 +219,24 @@ data:
       }
     }
 ---
+# Source: kubeapps/templates/kubeops-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubeapps-kubeops-config
+  labels:
+    app: kubeapps-kubeops-config
+    chart: kubeapps-4.0.2
+    release: kubeapps
+    heritage: Helm
+data:
+  clusters.conf: |-
+    [
+      {
+        "name": "default"
+      }
+    ]
+---
 # Source: kubeapps/templates/apprepository-rbac.yaml
 # The Kubeapps app repository controller can read and watch its own
 # AppRepository resources cluster-wide. The read and write cluster-roles can
@@ -228,10 +246,10 @@ kind: ClusterRole
 metadata:
   name: "kubeapps:kubeapps:apprepositories-read"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -253,10 +271,10 @@ kind: ClusterRole
 metadata:
   name: "kubeapps:kubeapps:apprepositories-write"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -281,10 +299,10 @@ kind: ClusterRole
 metadata:
   name: "kubeapps:controller:kubeops-ns-discovery-kubeapps"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -297,16 +315,38 @@ rules:
     verbs:
       - list
 ---
+# Source: kubeapps/templates/kubeops-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: "kubeapps:controller:kubeops-operators-kubeapps"
+  labels:
+    chart: kubeapps-4.0.2
+    release: kubeapps
+    heritage: Helm
+    helm.sh/chart: kubeapps-4.0.2
+    app.kubernetes.io/instance: kubeapps
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: kubeapps
+    app: kubeapps-internal-kubeops
+rules:
+  - apiGroups:
+      - packages.operators.coreos.com
+    resources:
+      - packagemanifests/icon
+    verbs:
+      - get
+---
 # Source: kubeapps/templates/apprepository-rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: "kubeapps:controller:kubeapps:apprepositories-read"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -326,10 +366,10 @@ kind: ClusterRoleBinding
 metadata:
   name: "kubeapps:controller:kubeops-ns-discovery-kubeapps"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -338,6 +378,29 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: "kubeapps:controller:kubeops-ns-discovery-kubeapps"
+subjects:
+  - kind: ServiceAccount
+    name: kubeapps-internal-kubeops
+    namespace: kubeapps
+---
+# Source: kubeapps/templates/kubeops-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: "kubeapps:controller:kubeops-operators-kubeapps"
+  labels:
+    chart: kubeapps-4.0.2
+    release: kubeapps
+    heritage: Helm
+    helm.sh/chart: kubeapps-4.0.2
+    app.kubernetes.io/instance: kubeapps
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: kubeapps
+    app: kubeapps-internal-kubeops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: "kubeapps:controller:kubeops-operators-kubeapps"
 subjects:
   - kind: ServiceAccount
     name: kubeapps-internal-kubeops
@@ -352,10 +415,10 @@ kind: Role
 metadata:
   name: kubeapps-internal-apprepository-job-postupgrade
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -375,10 +438,10 @@ kind: Role
 metadata:
   name: kubeapps-internal-apprepository-controller
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -459,10 +522,10 @@ kind: Role
 metadata:
   name: kubeapps-internal-kubeops
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -489,10 +552,10 @@ kind: RoleBinding
 metadata:
   name: kubeapps-internal-apprepository-job-postupgrade
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -512,10 +575,10 @@ kind: RoleBinding
 metadata:
   name: kubeapps-internal-apprepository-controller
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -535,10 +598,10 @@ kind: RoleBinding
 metadata:
   name: kubeapps-internal-kubeops
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -558,10 +621,10 @@ kind: Service
 metadata:
   name: kubeapps-postgresql-headless
   labels:
-    app: postgresql
-    chart: postgresql-8.10.14
-    release: "kubeapps"
-    heritage: "Helm"
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-9.7.2
+    app.kubernetes.io/instance: kubeapps
+    app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
   clusterIP: None
@@ -570,8 +633,8 @@ spec:
       port: 5432
       targetPort: tcp-postgresql
   selector:
-    app: postgresql
-    release: "kubeapps"
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: kubeapps
 ---
 # Source: kubeapps/charts/postgresql/templates/svc-read.yaml
 apiVersion: v1
@@ -579,10 +642,10 @@ kind: Service
 metadata:
   name: kubeapps-postgresql-read
   labels:
-    app: postgresql
-    chart: postgresql-8.10.14
-    release: "kubeapps"
-    heritage: "Helm"
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-9.7.2
+    app.kubernetes.io/instance: kubeapps
+    app.kubernetes.io/managed-by: Helm
   annotations:
 spec:
   type: ClusterIP
@@ -591,8 +654,8 @@ spec:
       port:  5432
       targetPort: tcp-postgresql
   selector:
-    app: postgresql
-    release: "kubeapps"
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: kubeapps
     role: slave
 ---
 # Source: kubeapps/charts/postgresql/templates/svc.yaml
@@ -601,10 +664,10 @@ kind: Service
 metadata:
   name: kubeapps-postgresql
   labels:
-    app: postgresql
-    chart: postgresql-8.10.14
-    release: "kubeapps"
-    heritage: "Helm"
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-9.7.2
+    app.kubernetes.io/instance: kubeapps
+    app.kubernetes.io/managed-by: Helm
   annotations:
 spec:
   type: ClusterIP
@@ -613,8 +676,8 @@ spec:
       port: 5432
       targetPort: tcp-postgresql
   selector:
-    app: postgresql
-    release: "kubeapps"
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: kubeapps
     role: master
 ---
 # Source: kubeapps/templates/assetsvc-service.yaml
@@ -623,10 +686,10 @@ kind: Service
 metadata:
   name: kubeapps-internal-assetsvc
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -649,10 +712,10 @@ metadata:
   name: kubeapps-internal-dashboard
   labels:
     app: kubeapps
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -674,10 +737,10 @@ metadata:
   name: kubeapps
   labels:
     app: kubeapps
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -699,10 +762,10 @@ metadata:
   name: kubeapps-internal-kubeops
   labels:
     app: kubeapps
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -723,10 +786,10 @@ kind: Deployment
 metadata:
   name: kubeapps-internal-apprepository-controller
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -745,21 +808,20 @@ spec:
         app.kubernetes.io/instance: kubeapps
         app.kubernetes.io/name: kubeapps
     spec:
-      serviceAccountName: kubeapps-internal-apprepository-controller
+      serviceAccountName: kubeapps-internal-apprepository-controller      
       containers:
         - name: controller
-          image: docker.io/bitnami/kubeapps-apprepository-controller:1.11.3-scratch-r0
+          image: docker.io/bitnami/kubeapps-apprepository-controller:2.0.0-scratch-r1
           imagePullPolicy: "IfNotPresent"
           command:
             - /apprepository-controller
           args:
-            - --user-agent-comment=kubeapps/v1.11.3
-            - --repo-sync-image=docker.io/bitnami/kubeapps-asset-syncer:1.11.3-scratch-r0
+            - --user-agent-comment=kubeapps/v2.0.0-beta.2
+            - --repo-sync-image=docker.io/bitnami/kubeapps-asset-syncer:2.0.0-scratch-r1
             - --repo-sync-cmd=/asset-syncer
             - --namespace=kubeapps
             - --database-secret-name=kubeapps-db
             - --database-secret-key=postgresql-password
-            - --database-type=postgresql
             - --database-url=kubeapps-postgresql:5432
             - --database-user=postgres
             - --database-name=assets
@@ -778,10 +840,10 @@ kind: Deployment
 metadata:
   name: kubeapps-internal-assetsvc
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -799,15 +861,14 @@ spec:
         app.kubernetes.io/name: kubeapps
         release: kubeapps
         app.kubernetes.io/instance: kubeapps
-    spec:
+    spec:      
       containers:
         - name: assetsvc
-          image: docker.io/bitnami/kubeapps-assetsvc:1.11.3-scratch-r0
+          image: docker.io/bitnami/kubeapps-assetsvc:2.0.0-scratch-r1
           imagePullPolicy: "IfNotPresent"
           command:
             - /assetsvc
           args:
-            - --database-type=postgresql
             - --database-user=postgres
             - --database-name=assets
             - --database-url=kubeapps-postgresql-headless:5432
@@ -843,10 +904,10 @@ kind: Deployment
 metadata:
   name: kubeapps-internal-dashboard
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -860,18 +921,18 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 8b7b7bc5908b5deff15034b9644daa036e1fab6b813b5e7b4830e7c21fa7b901
+        checksum/config: f0fd3781a591e9ac7fa4b6136848fc7bb37c69c87364cce0a954c81242198218
       labels:
         app: kubeapps-internal-dashboard
         app.kubernetes.io/name: kubeapps
         release: kubeapps
         app.kubernetes.io/instance: kubeapps
-        chart: kubeapps-3.9.2
-        helm.sh/chart: kubeapps-3.9.2
-    spec:
+        chart: kubeapps-4.0.2
+        helm.sh/chart: kubeapps-4.0.2
+    spec:      
       containers:
         - name: dashboard
-          image: docker.io/bitnami/kubeapps-dashboard:1.11.3-debian-10-r0
+          image: docker.io/bitnami/kubeapps-dashboard:2.0.0-beta.2-debian-10-r0
           imagePullPolicy: "IfNotPresent"
           livenessProbe:
             httpGet:
@@ -921,10 +982,10 @@ kind: Deployment
 metadata:
   name: kubeapps
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -938,16 +999,16 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 976e166f43c29fd0a1f6f87c5d0f78990e40bbd73a8965e7b966d44aac8d176e
+        checksum/config: 6910e9fc47f0aaf9adbf2a502294dfd416d8e6b03f0469b893b1f5e8b7f5d4f5
       labels:
         app: kubeapps
         app.kubernetes.io/name: kubeapps
         release: kubeapps
         app.kubernetes.io/instance: kubeapps
-    spec:
+    spec:      
       containers:
         - name: nginx
-          image: docker.io/bitnami/nginx:1.19.2-debian-10-r1
+          image: docker.io/bitnami/nginx:1.19.2-debian-10-r32
           imagePullPolicy: "IfNotPresent"
           livenessProbe:
             httpGet:
@@ -985,10 +1046,10 @@ kind: Deployment
 metadata:
   name: kubeapps-internal-kubeops
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -1006,20 +1067,26 @@ spec:
         app.kubernetes.io/name: kubeapps
         release: kubeapps
         app.kubernetes.io/instance: kubeapps
-    spec:
+    spec:      
       serviceAccountName: kubeapps-internal-kubeops
       # Increase termination timeout to let remaining operations to finish before killing the pods
       # This is because new releases/upgrades/deletions are synchronous operations
       terminationGracePeriodSeconds: 300
       containers:
         - name: kubeops
-          image: docker.io/bitnami/kubeapps-kubeops:1.11.3-scratch-r0
+          image: docker.io/bitnami/kubeapps-kubeops:2.0.0-scratch-r1
           imagePullPolicy: "IfNotPresent"
           command:
             - /kubeops
           args:
-            - --user-agent-comment=kubeapps/v1.11.3
+            - --user-agent-comment=kubeapps/v2.0.0-beta.2
             - --assetsvc-url=http://kubeapps-internal-assetsvc:8080
+            - --clusters-config-path=/config/clusters.conf
+          volumeMounts:
+            - name: kubeops-config
+              mountPath: /config
+            - name: ca-certs
+              mountPath: /etc/additional-clusters-cafiles
           env:
             - name: POD_NAMESPACE
               valueFrom:
@@ -1047,6 +1114,12 @@ spec:
             requests:
               cpu: 25m
               memory: 32Mi
+      volumes:
+        - name: kubeops-config
+          configMap:
+            name: kubeapps-kubeops-config
+        - name: ca-certs
+          emptyDir: {}
 ---
 # Source: kubeapps/charts/postgresql/templates/statefulset-slaves.yaml
 apiVersion: apps/v1
@@ -1054,42 +1127,44 @@ kind: StatefulSet
 metadata:
   name: "kubeapps-postgresql-slave"
   labels:
-    app: postgresql
-    chart: postgresql-8.10.14
-    release: "kubeapps"
-    heritage: "Helm"
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-9.7.2
+    app.kubernetes.io/instance: kubeapps
+    app.kubernetes.io/managed-by: Helm
   annotations:
 spec:
   serviceName: kubeapps-postgresql-headless
   replicas: 1
   selector:
     matchLabels:
-      app: postgresql
-      release: "kubeapps"
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/instance: kubeapps
       role: slave
   template:
     metadata:
       name: kubeapps-postgresql
       labels:
-        app: postgresql
-        chart: postgresql-8.10.14
-        release: "kubeapps"
-        heritage: "Helm"
+        app.kubernetes.io/name: postgresql
+        helm.sh/chart: postgresql-9.7.2
+        app.kubernetes.io/instance: kubeapps
+        app.kubernetes.io/managed-by: Helm
         role: slave
-    spec:
+    spec:      
       initContainers:
         # - name: do-something
         #   image: busybox
         #   command: ['do', 'something']
-
+        
       containers:
         - name: kubeapps-postgresql
-          image: docker.io/bitnami/postgresql:11.8.0-debian-10-r57
+          image: docker.io/bitnami/postgresql:11.9.0-debian-10-r34
           imagePullPolicy: "IfNotPresent"
           resources:
             requests:
               cpu: 250m
               memory: 256Mi
+          securityContext:
+            runAsUser: 1001
           env:
             - name: BITNAMI_DEBUG
               value: "false"
@@ -1119,6 +1194,20 @@ spec:
                 secretKeyRef:
                   name: kubeapps-db
                   key: postgresql-password
+            - name: POSTGRESQL_ENABLE_TLS
+              value: "no"
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "false"
+            - name: POSTGRESQL_LOG_CONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_LOG_DISCONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+              value: "off"
+            - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+              value: "error"
+            - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+              value: "pgaudit"
           ports:
             - name: tcp-postgresql
               containerPort: 5432
@@ -1127,7 +1216,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - exec pg_isready -U "postgres" -d "assets" -h 127.0.0.1 -p 5432
+                - exec pg_isready -U "postgres" -d "dbname=assets" -h 127.0.0.1 -p 5432
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -1140,7 +1229,7 @@ spec:
                 - -c
                 - -e
                 - |
-                  exec pg_isready -U "postgres" -d "assets" -h 127.0.0.1 -p 5432
+                  exec pg_isready -U "postgres" -d "dbname=assets" -h 127.0.0.1 -p 5432
                   [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -1166,10 +1255,10 @@ kind: StatefulSet
 metadata:
   name: kubeapps-postgresql-master
   labels:
-    app: postgresql
-    chart: postgresql-8.10.14
-    release: "kubeapps"
-    heritage: "Helm"
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-9.7.2
+    app.kubernetes.io/instance: kubeapps
+    app.kubernetes.io/managed-by: Helm
   annotations:
 spec:
   serviceName: kubeapps-postgresql-headless
@@ -1178,27 +1267,29 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: postgresql
-      release: "kubeapps"
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/instance: kubeapps
       role: master
   template:
     metadata:
       name: kubeapps-postgresql
       labels:
-        app: postgresql
-        chart: postgresql-8.10.14
-        release: "kubeapps"
-        heritage: "Helm"
+        app.kubernetes.io/name: postgresql
+        helm.sh/chart: postgresql-9.7.2
+        app.kubernetes.io/instance: kubeapps
+        app.kubernetes.io/managed-by: Helm
         role: master
-    spec:
+    spec:      
       containers:
         - name: kubeapps-postgresql
-          image: docker.io/bitnami/postgresql:11.8.0-debian-10-r57
+          image: docker.io/bitnami/postgresql:11.9.0-debian-10-r34
           imagePullPolicy: "IfNotPresent"
           resources:
             requests:
               cpu: 250m
               memory: 256Mi
+          securityContext:
+            runAsUser: 1001
           env:
             - name: BITNAMI_DEBUG
               value: "false"
@@ -1230,6 +1321,20 @@ spec:
               value: "assets"
             - name: POSTGRESQL_ENABLE_LDAP
               value: "no"
+            - name: POSTGRESQL_ENABLE_TLS
+              value: "no"
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "false"
+            - name: POSTGRESQL_LOG_CONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_LOG_DISCONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+              value: "off"
+            - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+              value: "error"
+            - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+              value: "pgaudit"
           ports:
             - name: tcp-postgresql
               containerPort: 5432
@@ -1238,7 +1343,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - exec pg_isready -U "postgres" -d "assets" -h 127.0.0.1 -p 5432
+                - exec pg_isready -U "postgres" -d "dbname=assets" -h 127.0.0.1 -p 5432
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -1251,7 +1356,7 @@ spec:
                 - -c
                 - -e
                 - |
-                  exec pg_isready -U "postgres" -d "assets" -h 127.0.0.1 -p 5432
+                  exec pg_isready -U "postgres" -d "dbname=assets" -h 127.0.0.1 -p 5432
                   [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -1279,10 +1384,10 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "-10"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -1298,10 +1403,10 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "-10"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -1315,15 +1420,15 @@ metadata:
   annotations:
     helm.sh/hook: pre-install
   labels:
-    chart: kubeapps-3.9.2
-    helm.sh/chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
+    helm.sh/chart: kubeapps-4.0.2
     release: kubeapps
     app.kubernetes.io/instance: kubeapps
     heritage: Helm
     app.kubernetes.io/managed-by: Helm
 data:
-  postgresql-password: "MFN3Zktvb3EzVQ=="
-  postgresql-replication-password: "ZlNqM1MzTjBDWA=="
+  postgresql-password: "Z0ZzY0R0RGo1Mw=="
+  postgresql-replication-password: "cHZ4ZkxDN09hNQ=="
 ---
 # Source: kubeapps/templates/apprepository-jobs-cleanup-rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1335,10 +1440,10 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "-10"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -1369,10 +1474,10 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "-10"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -1395,10 +1500,10 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "-10"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -1422,10 +1527,10 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded
     helm.sh/hook-weight: "-10"
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -1449,7 +1554,7 @@ metadata:
 spec:
   containers:
     - name: kubeapps-assetsvc-test
-      image: docker.io/bitnami/nginx:1.19.2-debian-10-r1
+      image: docker.io/bitnami/nginx:1.19.2-debian-10-r32
       env:
         - name: ASSETSVC_HOST
           value: kubeapps-internal-assetsvc.kubeapps
@@ -1463,7 +1568,7 @@ spec:
         - |
             n=0
             until [ "$n" -ge 5 ]; do
-              if curl -o /tmp/output $ASSETSVC_HOST:$ASSETSVC_PORT/v1/ns/kubeapps/charts && cat /tmp/output && cat /tmp/output | grep wordpress; then
+              if curl -o /tmp/output $ASSETSVC_HOST:$ASSETSVC_PORT/v1/clusters/default/namespaces/kubeapps/charts && cat /tmp/output && cat /tmp/output | grep wordpress; then
                 break
               fi
               sleep 10
@@ -1484,7 +1589,7 @@ metadata:
 spec:
   containers:
     - name: kubeapps-dashboard-test
-      image: docker.io/bitnami/nginx:1.19.2-debian-10-r1
+      image: docker.io/bitnami/nginx:1.19.2-debian-10-r32
       env:
         - name: DASHBOARD_HOST
           value: kubeapps.kubeapps
@@ -1504,10 +1609,10 @@ metadata:
     helm.sh/hook: post-delete
     helm.sh/hook-delete-policy: hook-succeeded
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -1520,12 +1625,12 @@ spec:
         app.kubernetes.io/name: kubeapps
         release: kubeapps
         app.kubernetes.io/instance: kubeapps
-    spec:
+    spec:      
       restartPolicy: OnFailure
       serviceAccountName: kubeapps-internal-apprepository-jobs-cleanup
       containers:
         - name: kubectl
-          image: docker.io/bitnami/kubectl:1.16.14-debian-10-r0
+          image: docker.io/bitnami/kubectl:1.18.9-debian-10-r5
           imagePullPolicy: "IfNotPresent"
           command:
             - /bin/sh
@@ -1546,10 +1651,10 @@ metadata:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: hook-succeeded
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -1562,18 +1667,17 @@ spec:
         app.kubernetes.io/name: kubeapps
         release: kubeapps
         app.kubernetes.io/instance: kubeapps
-    spec:
+    spec:      
       restartPolicy: OnFailure
       serviceAccountName: kubeapps-internal-apprepository-job-postupgrade
       containers:
         - name: invalidate-cache
-          image: docker.io/bitnami/kubeapps-asset-syncer:1.11.3-scratch-r0
+          image: docker.io/bitnami/kubeapps-asset-syncer:2.0.0-scratch-r1
           imagePullPolicy: "IfNotPresent"
           command:
             - /asset-syncer
           args:
             - invalidate-cache
-            - --database-type=postgresql
             - --database-url=kubeapps-postgresql:5432
             - --database-user=postgres
             - --database-name=assets
@@ -1587,13 +1691,13 @@ spec:
         # Helm 3.1 supports a lookup template tag to create a secret if it does not exist
         # but we can't yet restrict to helm 3.1, hence manually doing this with an initContainer.
         - name: ensure-postgres-password
-          image: docker.io/bitnami/kubectl:1.16.14-debian-10-r0
+          image: docker.io/bitnami/kubectl:1.18.9-debian-10-r5
           imagePullPolicy: "IfNotPresent"
           command:
             - /bin/bash
           args:
             - -c
-            - 'kubectl -n kubeapps get secret kubeapps-db || kubectl -n kubeapps create secret generic kubeapps-db --from-literal=postgresql-password="R2szGs7NrZ" --from-literal=postgresql-replication-password="aITuzFgY63"'
+            - 'kubectl -n kubeapps get secret kubeapps-db || kubectl -n kubeapps create secret generic kubeapps-db --from-literal=postgresql-password="1nemcnbEDK" --from-literal=postgresql-replication-password="mywc7j1fhY"'
 ---
 # Source: kubeapps/templates/db-secret-jobs-cleanup.yaml
 apiVersion: batch/v1
@@ -1604,10 +1708,10 @@ metadata:
     helm.sh/hook: post-delete
     helm.sh/hook-delete-policy: hook-succeeded
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps
@@ -1620,18 +1724,18 @@ spec:
         app.kubernetes.io/name: kubeapps
         release: kubeapps
         app.kubernetes.io/instance: kubeapps
-    spec:
+    spec:      
       restartPolicy: OnFailure
       serviceAccountName: kubeapps-internal-db-secret-jobs-cleanup
       containers:
         - name: kubectl
-          image: docker.io/bitnami/kubectl:1.16.14-debian-10-r0
+          image: docker.io/bitnami/kubectl:1.18.9-debian-10-r5
           imagePullPolicy: "IfNotPresent"
           command:
             - /bin/sh
           args:
             - -c
-            - "kubectl delete secret -n kubeapps kubeapps-mongodb kubeapps-db|| true"
+            - "kubectl delete secret -n kubeapps kubeapps-db|| true"
 ---
 # Source: kubeapps/templates/apprepositories.yaml
 apiVersion: kubeapps.com/v1alpha1
@@ -1641,10 +1745,10 @@ metadata:
   annotations:
     "helm.sh/hook": post-install
   labels:
-    chart: kubeapps-3.9.2
+    chart: kubeapps-4.0.2
     release: kubeapps
     heritage: Helm
-    helm.sh/chart: kubeapps-3.9.2
+    helm.sh/chart: kubeapps-4.0.2
     app.kubernetes.io/instance: kubeapps
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: kubeapps

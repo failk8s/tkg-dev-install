@@ -12,7 +12,7 @@ directories:
   - path: upstream/cert-manager
     githubRelease:
       slug: jetstack/cert-manager
-      tag: v1.0.1
+      tag: v1.0.3
       disableAutoChecksumValidation: true
     includePaths:
     - cert-manager.crds.yaml
@@ -47,7 +47,7 @@ directories:
   - path: controller/upstream/contour
     git:
       url: https://github.com/projectcontour/contour
-      ref: v1.8.1
+      ref: v1.9.0
     includePaths:
     - examples/contour/**/*
   - path: controller/downstream
@@ -211,7 +211,7 @@ directories:
   - path: upstream/collector
     git:
       url: https://github.com/wavefrontHQ/wavefront-collector-for-kubernetes
-      ref: v1.2.3
+      ref: v1.2.4
     includePaths:
     - deploy/kubernetes/**/*
   - path: upstream/proxy

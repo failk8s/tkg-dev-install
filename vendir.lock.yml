@@ -2,7 +2,7 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/jetstack/cert-manager/releases/30748447
+      url: https://api.github.com/repos/jetstack/cert-manager/releases/32307751
     path: upstream/cert-manager
   - manual: {}
     path: downstream
@@ -21,8 +21,8 @@ directories:
   path: k8s/eduk8s
 - contents:
   - git:
-      commitTitle: Update Contour Docker image to v1.8.1....
-      sha: 3e34f4b6257a900aed23b96be7be36b7ac83d86b
+      commitTitle: Update Contour Docker image to v1.9.0....
+      sha: 5eee0208e5f3963f94ec5e018a1676e0f9d4381c
     path: controller/upstream/contour
   - manual: {}
     path: controller/downstream
@@ -43,8 +43,8 @@ directories:
   - manual: {}
     path: certs/config
   - git:
-      commitTitle: Wrong call for in cluster initialisation.
-      sha: 6c792b9328ebf0fdc6ae3e1f77a94cdbc18a92fc
+      commitTitle: Don't copy labels from original source secret.
+      sha: 457890a09a2551b9002eec73386b11a37469569f
     path: secret-operator/upstream
   - manual: {}
     path: secret-operator/downstream
@@ -116,8 +116,8 @@ directories:
   path: k8s/testapp
 - contents:
   - git:
-      commitTitle: doc rcs
-      sha: 649ea341f49f3b3ad9934e98817e1f59788d6b41
+      commitTitle: rename whitelist/blacklist to allow/deny-list (#73)...
+      sha: 13d51af0cc004f9f144aaeef72f5709208ac82cf
     path: upstream/collector
   - git:
       commitTitle: bump proxy version
@@ -142,9 +142,9 @@ directories:
       sha: 256af0eebec7b4f1449110c9b5f39785c6030bde
     path: upstream/lab-image-security
   - git:
-      commitTitle: Update to version 200921.043323.ed97b3a of base environment workshop
+      commitTitle: Update to version 201007.062234.403f0f1 of base environment workshop
         image.
-      sha: 1d870f4d8db77447010fe1571c75866f940cf1cf
+      sha: 6507e67830f04d4c06f70a55d54d24f3e89cf986
     path: upstream/lab-k8s-fundamentals
   - git:
       commitTitle: Clarify that can click on any action block.
@@ -171,8 +171,8 @@ directories:
       sha: abd76ad3b86a723f568c17288a26739e916ddfa8
     path: upstream/lab-tekton-fundamentals
   - git:
-      commitTitle: Update repository name.
-      sha: f695f13b523a0ca2a5b52a17f53605f1cb788b4a
+      commitTitle: Delete old configuration.
+      sha: 646542293f484bee0ca602c550df73cc149a9036
     path: upstream/lab-kubeapps-testing
   - manual: {}
     path: downstream

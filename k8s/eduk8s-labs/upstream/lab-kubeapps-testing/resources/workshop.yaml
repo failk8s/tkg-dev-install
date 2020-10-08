@@ -25,15 +25,16 @@ spec:
         enabled: true
     dashboards:
     - name: Kubeapps
-      url: $(ingress_protocol)://$(session_namespace)-kubeapps.$(ingress_domain)/#/c/default/ns/$(session_namespace)/apps
+      url: $(ingress_protocol)://$(session_namespace)-kubeapps.$(ingress_domain)/
     ingresses:
     - name: kubeapps
       host: kubeapps.kubeapps.svc.cluster.local
       port: 0
-      headers:
-      - name: Authorization
-        value: Bearer $(kubernetes_token)
     objects:
+    - apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: kubeapps-user
     - apiVersion: rbac.authorization.k8s.io/v1
       kind: Role
       metadata:
@@ -48,6 +49,19 @@ spec:
         - delete
         - get
         - list
+        - update
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: kubeapps-admin
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: admin
+      subjects:
+      - kind: ServiceAccount
+        namespace: $(session_namespace)
+        name: kubeapps-user
     - apiVersion: rbac.authorization.k8s.io/v1
       kind: RoleBinding
       metadata:
@@ -58,5 +72,36 @@ spec:
         name: kubeapps-user
       subjects:
       - kind: ServiceAccount
+        namespace: $(session_namespace)
+        name: kubeapps-user
+      - kind: ServiceAccount
         namespace: $(workshop_namespace)
         name: $(service_account)
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: $(session_namespace)-kubeapps-user
+        namespace: kubeapps
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: $(workshop_namespace)-kubeapps-user
+      subjects:
+      - kind: ServiceAccount
+        namespace: $(session_namespace)
+        name: kubeapps-user
+  environment:
+    objects:
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: $(workshop_namespace)-kubeapps-user
+        namespace: kubeapps
+      rules:
+      - apiGroups:
+        - kubeapps.com
+        resources:
+        - apprepositories
+        verbs:
+        - get
+        - list

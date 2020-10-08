@@ -1,7 +1,7 @@
 #@ load("@ytt:data", "data")
 #@ load("@ytt:overlay", "overlay")
 
-#@ if data.values.wavefront.install==True:
+#@ if data.values.wavefront.install != True:
 
 #! Add dummy cm
 ---
