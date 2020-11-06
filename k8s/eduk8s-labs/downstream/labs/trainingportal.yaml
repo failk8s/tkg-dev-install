@@ -6,7 +6,7 @@ metadata:
 spec:
   portal:
     sessions:
-      maximum: 10
+      maximum: 15
     reserved: 0
     initial: 0
   workshops:

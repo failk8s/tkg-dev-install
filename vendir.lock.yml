@@ -2,7 +2,7 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/jetstack/cert-manager/releases/32307751
+      url: https://api.github.com/repos/jetstack/cert-manager/releases/33227877
     path: upstream/cert-manager
   - manual: {}
     path: downstream
@@ -11,8 +11,10 @@ directories:
   path: k8s/cert-manager
 - contents:
   - git:
-      commitTitle: Update to version 200921.055522.7cb980e of eduk8s operator.
-      sha: dd3049d2cb9275fccfa6a89749257b97cb92f9ed
+      commitTitle: Upgrade to version 201105.062844.a424871 of eduk8s operator.
+      sha: 05fb3183845ba88b0c9dd63a9d3ef1bda6fe07ab
+      tags:
+      - 20.11.05.1
     path: upstream/eduk8s
   - manual: {}
     path: downstream
@@ -23,14 +25,18 @@ directories:
   - git:
       commitTitle: Update Contour Docker image to v1.9.0....
       sha: 5eee0208e5f3963f94ec5e018a1676e0f9d4381c
+      tags:
+      - v1.9.0
     path: controller/upstream/contour
   - manual: {}
     path: controller/downstream
   - manual: {}
     path: controller/config
   - git:
-      commitTitle: 'Merge pull request #1706 from kubernetes-sigs/changelog-for-v0.7.3...'
-      sha: 3a61439cd116741012026036e166008993d0d0e7
+      commitTitle: Added labelFilter for source CRD (#1461)...
+      sha: 79ea64884bbfc89f9c1f444c9dddd5ce361f31ad
+      tags:
+      - v0.7.4
     path: dns/upstream/external-dns
   - manual: {}
     path: dns/downstream
@@ -53,13 +59,13 @@ directories:
   path: k8s/ingress
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/knative/serving/releases/30501734
+      url: https://api.github.com/repos/knative/serving/releases/31950580
     path: upstream/serving
   - githubRelease:
-      url: https://api.github.com/repos/knative-sandbox/net-contour/releases/29840412
+      url: https://api.github.com/repos/knative-sandbox/net-contour/releases/31954474
     path: upstream/net-contour
   - githubRelease:
-      url: https://api.github.com/repos/knative-sandbox/net-certmanager/releases/30496739
+      url: https://api.github.com/repos/knative-sandbox/net-certmanager/releases/31952594
     path: upstream/net-certmanager
   - manual: {}
     path: downstream
@@ -68,7 +74,7 @@ directories:
   path: k8s/knative
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/pivotal/kpack/releases/30225354
+      url: https://api.github.com/repos/pivotal/kpack/releases/33133324
     path: upstream/kpack
   - manual: {}
     path: downstream
@@ -118,6 +124,8 @@ directories:
   - git:
       commitTitle: rename whitelist/blacklist to allow/deny-list (#73)...
       sha: 13d51af0cc004f9f144aaeef72f5709208ac82cf
+      tags:
+      - v1.2.4
     path: upstream/collector
   - git:
       commitTitle: bump proxy version
@@ -130,8 +138,8 @@ directories:
   path: k8s/wavefront
 - contents:
   - git:
-      commitTitle: Add frame to image.
-      sha: 8d83484a84aa9043bcd2ff36bbc88322093ce919
+      commitTitle: Avoid use of reserved port.
+      sha: a58a06f9aa9a2e298ee763f72249b6553cc7db61
     path: upstream/lab-container-basics
   - git:
       commitTitle: Move budget location, remove logo.
@@ -142,9 +150,8 @@ directories:
       sha: 256af0eebec7b4f1449110c9b5f39785c6030bde
     path: upstream/lab-image-security
   - git:
-      commitTitle: Update to version 201007.062234.403f0f1 of base environment workshop
-        image.
-      sha: 6507e67830f04d4c06f70a55d54d24f3e89cf986
+      commitTitle: Don't override kubectl version.
+      sha: 07f56daeb41042943bf9286979a883482cb6765f
     path: upstream/lab-k8s-fundamentals
   - git:
       commitTitle: Clarify that can click on any action block.
@@ -155,8 +162,8 @@ directories:
       sha: 43760adceb6d034b7a53212f15f152e65a0d3668
     path: upstream/lab-getting-started-with-carvel
   - git:
-      commitTitle: Fix docker guide links.
-      sha: 4756b87ff094445850c3b993df27a285c21dd93b
+      commitTitle: Cleanup list of ignored files.
+      sha: eacf5ebd9fe8ed1705e1ec0c149b4dfe9a59c889
     path: upstream/lab-spring-boot-k8s-getting-started
   - git:
       commitTitle: Fix docker guide links.

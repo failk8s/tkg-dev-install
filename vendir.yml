@@ -1,7 +1,7 @@
 # See: https://github.com/k14s/vendir/blob/develop/docs/vendir-spec.md
 apiVersion: vendir.k14s.io/v1alpha1
 kind: Config
-minimumRequiredVersion: 0.10.0
+minimumRequiredVersion: 0.11.0
 directories:
 
 ##########
@@ -12,7 +12,7 @@ directories:
   - path: upstream/cert-manager
     githubRelease:
       slug: jetstack/cert-manager
-      tag: v1.0.3
+      tag: v1.0.4
       disableAutoChecksumValidation: true
     includePaths:
     - cert-manager.crds.yaml
@@ -30,7 +30,7 @@ directories:
   - path: upstream/eduk8s
     git:
       url: https://github.com/eduk8s/eduk8s
-      ref: 20.09.21.1
+      ref: 20.11.05.1
     includePaths:
     - resources/crds-v1/**/*
     - resources/operator/**/*
@@ -58,7 +58,7 @@ directories:
   - path: dns/upstream/external-dns
     git:
       url: https://github.com/kubernetes-sigs/external-dns
-      ref: v0.7.3
+      ref: v0.7.4
     includePaths:
     - kustomize/external-dns-*
   - path: dns/downstream
@@ -94,7 +94,7 @@ directories:
   - path: upstream/serving
     githubRelease:
       slug: knative/serving
-      tag: v0.17.2
+      tag: v0.18.0
       disableAutoChecksumValidation: true
     includePaths:
 #    - serving-crds.yaml
@@ -103,14 +103,14 @@ directories:
   - path: upstream/net-contour
     githubRelease:
       slug: knative/net-contour
-      tag: v0.17.0
+      tag: v0.18.0
       disableAutoChecksumValidation: true
     includePaths:
     - net-contour.yaml
   - path: upstream/net-certmanager
     githubRelease:
       slug: knative/net-certmanager
-      tag: v0.17.1
+      tag: v0.18.0
       disableAutoChecksumValidation: true
     includePaths:
     - net-certmanager.yaml
@@ -127,10 +127,10 @@ directories:
   - path: upstream/kpack
     githubRelease:
       slug: pivotal/kpack
-      tag: v0.1.2
+      tag: v0.1.3
       disableAutoChecksumValidation: true
     includePaths:
-    - release-0.1.2.yaml
+    - release-0.1.3.yaml
   - path: downstream
     manual: {}
   - path: config

@@ -28,6 +28,8 @@ spec:
                   properties:
                     domain:
                       type: string
+                    protocol:
+                      type: string
                     secret:
                       type: string
                     class:
@@ -44,6 +46,10 @@ spec:
                 dockerd:
                   type: object
                   properties:
+                    rootless:
+                      type: boolean
+                    privileged:
+                      type: boolean
                     mtu:
                       type: integer
                     mirror:
@@ -128,16 +134,22 @@ spec:
                     dashboard:
                       type: object
                       properties:
+                        script:
+                          type: string
                         style:
                           type: string
                     workshop:
                       type: object
                       properties:
+                        script:
+                          type: string
                         style:
                           type: string
                     portal:
                       type: object
                       properties:
+                        script:
+                          type: string
                         style:
                           type: string
             status:
