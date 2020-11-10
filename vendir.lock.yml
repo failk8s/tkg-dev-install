@@ -23,10 +23,10 @@ directories:
   path: k8s/eduk8s
 - contents:
   - git:
-      commitTitle: Update Contour Docker image to v1.9.0....
-      sha: 5eee0208e5f3963f94ec5e018a1676e0f9d4381c
+      commitTitle: Update Contour Docker image to v1.10.0....
+      sha: 92420b8e0b123afb475bb7df9f50c85da29592cb
       tags:
-      - v1.9.0
+      - v1.10.0
     path: controller/upstream/contour
   - manual: {}
     path: controller/downstream

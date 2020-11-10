@@ -47,7 +47,7 @@ spec:
         - --contour-key-file=/certs/tls.key
         - --config-path=/config/contour.yaml
         command: ["contour"]
-        image: docker.io/projectcontour/contour:v1.9.0
+        image: docker.io/projectcontour/contour:v1.10.0
         imagePullPolicy: Always
         name: contour
         ports:
@@ -55,6 +55,9 @@ spec:
           name: xds
           protocol: TCP
         - containerPort: 8000
+          name: metrics
+          protocol: TCP
+        - containerPort: 6060
           name: debug
           protocol: TCP
         livenessProbe:

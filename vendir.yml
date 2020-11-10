@@ -47,7 +47,7 @@ directories:
   - path: controller/upstream/contour
     git:
       url: https://github.com/projectcontour/contour
-      ref: v1.9.0
+      ref: v1.10.0
     includePaths:
     - examples/contour/**/*
   - path: controller/downstream
