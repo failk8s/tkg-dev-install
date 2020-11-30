@@ -12,7 +12,7 @@ directories:
   - path: upstream/cert-manager
     githubRelease:
       slug: jetstack/cert-manager
-      tag: v1.0.4
+      tag: v1.1.0
       disableAutoChecksumValidation: true
     includePaths:
     - cert-manager.crds.yaml
@@ -127,10 +127,10 @@ directories:
   - path: upstream/kpack
     githubRelease:
       slug: pivotal/kpack
-      tag: v0.1.3
+      tag: v0.1.4
       disableAutoChecksumValidation: true
     includePaths:
-    - release-0.1.3.yaml
+    - release-0.1.4.yaml
   - path: downstream
     manual: {}
   - path: config
@@ -211,7 +211,7 @@ directories:
   - path: upstream/collector
     git:
       url: https://github.com/wavefrontHQ/wavefront-collector-for-kubernetes
-      ref: v1.2.4
+      ref: v1.2.6
     includePaths:
     - deploy/kubernetes/**/*
   - path: upstream/proxy

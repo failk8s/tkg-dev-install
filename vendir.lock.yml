@@ -2,7 +2,7 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/jetstack/cert-manager/releases/33227877
+      url: https://api.github.com/repos/jetstack/cert-manager/releases/34373236
     path: upstream/cert-manager
   - manual: {}
     path: downstream
@@ -74,7 +74,7 @@ directories:
   path: k8s/knative
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/pivotal/kpack/releases/33133324
+      url: https://api.github.com/repos/pivotal/kpack/releases/34245146
     path: upstream/kpack
   - manual: {}
     path: downstream
@@ -122,10 +122,10 @@ directories:
   path: k8s/testapp
 - contents:
   - git:
-      commitTitle: rename whitelist/blacklist to allow/deny-list (#73)...
-      sha: 13d51af0cc004f9f144aaeef72f5709208ac82cf
+      commitTitle: fix pod & container counts (#80)...
+      sha: 5ac4f134c6f9bfa7443fb959615f0c032a1dfc62
       tags:
-      - v1.2.4
+      - v1.2.6
     path: upstream/collector
   - git:
       commitTitle: bump proxy version
