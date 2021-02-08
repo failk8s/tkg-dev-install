@@ -42,7 +42,7 @@ eduk8s:
   pullpolicy: IfNotPresent
   wildcard: eduk8s-wildcard
   operator:
-    image: quay.io/eduk8s/eduk8s-operator:201105.062844.a424871
+    image: quay.io/eduk8s/eduk8s-operator:201203.030350.f72ecda
   google_analytics:
   dashboard_style:
   workshop_style:

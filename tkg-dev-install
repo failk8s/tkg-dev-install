@@ -51,6 +51,9 @@ steps["eduk8s-labs.1.path"]="k8s/eduk8s-labs"
 #
 steps['testapp.1.name']='testapp'
 steps['testapp.1.path']='k8s/testapp'
+#
+steps['testknativeapp.1.name']='testknativeapp'
+steps['testknativeapp.1.path']='k8s/testknativeapp'
 
 FULL_DEV_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront"
 FULL_EDUK8S_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront eduk8s eduk8s-labs"
@@ -174,6 +177,7 @@ function help {
   echo "    eduk8s             Installs eduk8s platform"
   echo "    eduk8s-labs        Installs eduk8s labs"
   echo "    testapp            Installs a test application (kuard)"
+  echo "    testknativeapp     Installs a test application as a KNative service (kuard)"
   echo ""
   echo "    full-dev           Full Developer install (everything except eduk8s)"
   echo "    full-eduk8s        Full Eduk8s install (everything)"
@@ -390,6 +394,10 @@ then
       shift # past argument
       execute testapp "$@"
       ;;
+    testknativeapp)
+      shift # past argument
+      execute testknativeapp "$@"
+      ;;
     wavefront)
       shift # past argument
       execute wavefront "$@"
@@ -403,7 +411,7 @@ then
       full eduk8s "$@"
       ;;
     *)
-      help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|eduk8s-labs|testapp|full-dev|full-eduk8s"
+      help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|eduk8s-labs|testapp|testknativeapp|full-dev|full-eduk8s"
       ;;
   esac
 else

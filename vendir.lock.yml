@@ -11,10 +11,10 @@ directories:
   path: k8s/cert-manager
 - contents:
   - git:
-      commitTitle: Upgrade to version 201105.062844.a424871 of eduk8s operator.
-      sha: 05fb3183845ba88b0c9dd63a9d3ef1bda6fe07ab
+      commitTitle: Update to version 201203.030350.f72ecda of the eduk8s operator.
+      sha: 9659e9a3616a963f1ce91c8f5226aca231084d47
       tags:
-      - 20.11.05.1
+      - 20.12.03.1
     path: upstream/eduk8s
   - manual: {}
     path: downstream
@@ -59,13 +59,13 @@ directories:
   path: k8s/ingress
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/knative/serving/releases/31950580
+      url: https://api.github.com/repos/knative/serving/releases/36293413
     path: upstream/serving
   - githubRelease:
-      url: https://api.github.com/repos/knative-sandbox/net-contour/releases/31954474
+      url: https://api.github.com/repos/knative-sandbox/net-contour/releases/36279532
     path: upstream/net-contour
   - githubRelease:
-      url: https://api.github.com/repos/knative-sandbox/net-certmanager/releases/31952594
+      url: https://api.github.com/repos/knative-sandbox/net-certmanager/releases/36278057
     path: upstream/net-certmanager
   - manual: {}
     path: downstream
@@ -74,7 +74,7 @@ directories:
   path: k8s/knative
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/pivotal/kpack/releases/34245146
+      url: https://api.github.com/repos/pivotal/kpack/releases/36149587
     path: upstream/kpack
   - manual: {}
     path: downstream
@@ -99,13 +99,13 @@ directories:
   path: k8s/registry
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/pipeline/releases/27474766
+      url: https://api.github.com/repos/tektoncd/pipeline/releases/36626841
     path: upstream/pipeline
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/triggers/releases/27878559
+      url: https://api.github.com/repos/tektoncd/triggers/releases/36985214
     path: upstream/triggers
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/dashboard/releases/28065648
+      url: https://api.github.com/repos/tektoncd/dashboard/releases/36331634
     path: upstream/dashboard
   - manual: {}
     path: downstream
@@ -150,8 +150,9 @@ directories:
       sha: 256af0eebec7b4f1449110c9b5f39785c6030bde
     path: upstream/lab-image-security
   - git:
-      commitTitle: Don't override kubectl version.
-      sha: 07f56daeb41042943bf9286979a883482cb6765f
+      commitTitle: Update to version 201203.020609.1ab533d of base environment workshop
+        image.
+      sha: f0d20bf62a7ebf460185970c017617d872d6e6a3
     path: upstream/lab-k8s-fundamentals
   - git:
       commitTitle: Clarify that can click on any action block.

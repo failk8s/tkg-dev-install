@@ -17,6 +17,6 @@ spec:
       #@overlay/match by=overlay.map_key("name")
       - name: external-dns
         #@overlay/replace
-        image: us.gcr.io/k8s-artifacts-prod/external-dns/external-dns:v0.7.4
+        image: k8s.gcr.io/external-dns/external-dns:v0.7.6
 
 #@ end

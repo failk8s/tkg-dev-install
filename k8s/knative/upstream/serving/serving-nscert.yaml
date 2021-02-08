@@ -17,13 +17,13 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: knative-serving-namespace-wildcard-certs
   labels:
-    serving.knative.dev/release: "v0.18.0"
+    serving.knative.dev/release: "v0.20.0"
     serving.knative.dev/controller: "true"
     networking.knative.dev/wildcard-certificate-provider: nscert
 rules:
-- apiGroups: [""]
-  resources: ["namespaces/finalizers"]
-  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+  - apiGroups: [""]
+    resources: ["namespaces/finalizers"]
+    verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
 
 ---
 # Copyright 2019 The Knative Authors
@@ -46,7 +46,7 @@ metadata:
   name: networking-ns-cert
   namespace: knative-serving
   labels:
-    serving.knative.dev/release: "v0.18.0"
+    serving.knative.dev/release: "v0.20.0"
     networking.knative.dev/wildcard-certificate-provider: nscert
 spec:
   selector:
@@ -58,69 +58,74 @@ spec:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
       labels:
         app: networking-ns-cert
-        serving.knative.dev/release: "v0.18.0"
+        serving.knative.dev/release: "v0.20.0"
     spec:
       # To avoid node becoming SPOF, spread our replicas to different nodes.
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  app: networking-ns-cert
-              topologyKey: kubernetes.io/hostname
-            weight: 100
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: networking-ns-cert
+                topologyKey: kubernetes.io/hostname
+              weight: 100
       serviceAccountName: controller
       containers:
-      - name: networking-nscert
-        # This is the Go import path for the binary that is containerized
-        # and substituted here.
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/networking/nscert@sha256:8f25807ac54583286f7e9d0e448c2e4add4b1634791c9e721af205f1fe9b8f26
-        resources:
-          requests:
-            cpu: 30m
-            memory: 40Mi
-          limits:
-            cpu: 300m
-            memory: 400Mi
-        env:
-        - name: SYSTEM_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: CONFIG_LOGGING_NAME
-          value: config-logging
-        - name: CONFIG_OBSERVABILITY_NAME
-          value: config-observability
-        - # TODO(https://github.com/knative/pkg/pull/953): Remove stackdriver specific config
-          name: METRICS_DOMAIN
-          value: knative.dev/serving
-        securityContext:
-          allowPrivilegeEscalation: false
-        ports:
-        - name: metrics
-          containerPort: 9090
-        - name: profiling
-          containerPort: 8008
+        - name: networking-nscert
+          # This is the Go import path for the binary that is containerized
+          # and substituted here.
+          image: gcr.io/knative-releases/knative.dev/serving/cmd/networking/nscert@sha256:121393d212cd41d2274c3bc1e093bf618ccc6430b8d8df2648387b8d7d927b63
+          resources:
+            requests:
+              cpu: 30m
+              memory: 40Mi
+            limits:
+              cpu: 300m
+              memory: 400Mi
+          env:
+            - name: SYSTEM_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: CONFIG_LOGGING_NAME
+              value: config-logging
+            - name: CONFIG_OBSERVABILITY_NAME
+              value: config-observability
+            # TODO(https://github.com/knative/pkg/pull/953): Remove stackdriver specific config
+            - name: METRICS_DOMAIN
+              value: knative.dev/serving
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - all
+          ports:
+            - name: metrics
+              containerPort: 9090
+            - name: profiling
+              containerPort: 8008
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
     app: networking-ns-cert
-    serving.knative.dev/release: "v0.18.0"
+    serving.knative.dev/release: "v0.20.0"
     networking.knative.dev/wildcard-certificate-provider: nscert
   name: networking-ns-cert
   namespace: knative-serving
 spec:
   ports:
-  - # Define metrics and profiling for them to be accessible within service meshes.
-    name: http-metrics
-    port: 9090
-    targetPort: 9090
-  - name: http-profiling
-    port: 8008
-    targetPort: 8008
+    # Define metrics and profiling for them to be accessible within service meshes.
+    - name: http-metrics
+      port: 9090
+      targetPort: 9090
+    - name: http-profiling
+      port: 8008
+      targetPort: 8008
   selector:
     app: networking-ns-cert
 

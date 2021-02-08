@@ -1,0 +1,27 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: testknativeapp 
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: testknativeapp
+  namespace: testknativeapp
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  labels:
+    app: testknativeapp
+  name: testknativeapp
+  namespace: testknativeapp
+spec:
+  template:
+    spec:
+      containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:1
+          securityContext:
+            runAsUser: 100
+      serviceAccountName: testknativeapp
