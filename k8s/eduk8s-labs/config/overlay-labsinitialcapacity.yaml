@@ -9,3 +9,5 @@ spec:
   portal:
     reserved: 1 
     initial: #@ data.values.eduk8s.initial_capacity
+    sessions:
+      maximum: 15

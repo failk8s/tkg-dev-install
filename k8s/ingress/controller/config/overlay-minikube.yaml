@@ -1,11 +1,26 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
 
-#@ if/end data.values.cluster_type=="minikube":
+#@ if data.values.cluster_type=="minikube":
+
 #@overlay/match by=overlay.subset({"kind":"Service", "metadata": {"name": "envoy"}})
 ---
 spec:
   type: ClusterIP
   #@overlay/match missing_ok=True
   #@overlay/remove
-  externalTrafficPolicy:  
+  externalTrafficPolicy:
+
+
+#@overlay/match by=overlay.subset({"kind":"DaemonSet", "metadata": {"name": "envoy"}})
+---
+spec:
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      dnsPolicy: ClusterFirstWithHostNet
+      #@overlay/match missing_ok=True
+      hostNetwork: true
+
+
+#@ end

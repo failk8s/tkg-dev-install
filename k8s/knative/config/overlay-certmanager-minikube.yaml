@@ -1,0 +1,22 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@ if data.values.cluster_type=="minikube":
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata": {"name": "config-certmanager"}})
+---
+data:
+  #@overlay/match missing_ok=True
+  issuerRef: |
+    kind: ClusterIssuer
+    name: wildcard
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata": {"name": "config-network"}})
+---
+data:
+  #@overlay/match missing_ok=True
+  autoTLS: Enabled
+  #@overlay/match missing_ok=True
+  httpProtocol: Enabled
+
+#@ end

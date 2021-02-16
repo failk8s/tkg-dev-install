@@ -1,0 +1,25 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#! from: https://github.com/voor/cluster-api-gitops/blob/master/workload/knative/manifests/overlay-knative.yaml#L27-L39
+#! To make knative work
+#@overlay/match by=overlay.subset({"metadata":{"name":"config-contour"}})
+---
+data:
+  #@overlay/match missing_ok=True
+  #@yaml/text-templated-strings
+  visibility: |
+    ExternalIP:
+      class: contour
+      service: (@= data.values.ingress.namespace @)/envoy
+    ClusterLocal:
+      class: contour
+      service: (@= data.values.ingress.namespace @)/envoy
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata": {"name": "config-network"}})
+---
+data:
+  #@overlay/match missing_ok=True
+  ingress.class: contour.ingress.networking.knative.dev
+  #@overlay/match missing_ok=True
+  domainTemplate: "{{.Name}}-{{.Namespace}}.{{.Domain}}"

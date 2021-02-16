@@ -1,0 +1,12 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
+
+#@ w = data.values.wildcard_domain or assert.fail("missing wildcard_domain definition")
+
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata": {"name": "config-domain"}})
+---
+#@yaml/text-templated-strings
+data:
+  #@overlay/match missing_ok=True
+  (@=  w @) : ""

@@ -1,0 +1,9 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+
+# TODO: Remove this in tekton, if still is same dependency
+#! Remove CRDs that are also installed with tekton
+##@overlay/match by=overlay.subset({"kind":"CustomResourceDefinition", "metadata": {"name": "images.caching.internal.knative.dev"}})
+##@overlay/remove
+---

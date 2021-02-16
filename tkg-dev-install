@@ -55,8 +55,9 @@ steps['testapp.1.path']='k8s/testapp'
 steps['testknativeapp.1.name']='testknativeapp'
 steps['testknativeapp.1.path']='k8s/testknativeapp'
 
-FULL_DEV_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront"
-FULL_EDUK8S_STEPS="cert-manager ingress registry kpack tekton knative kubeapps wavefront eduk8s eduk8s-labs"
+FULL_DEV="cert-manager ingress registry kpack tekton knative kubeapps wavefront testapp testknativeapp"
+FULL_EDUK8S="cert-manager ingress registry kpack tekton knative kubeapps wavefront testapp testknativeapp eduk8s eduk8s-labs"
+FULL_KNATIVE="cert-manager ingress registry knative testknativeapp"
 
 #install_log=$(mktemp install.log.XXXXXX)
 install_log=install.log
@@ -265,9 +266,11 @@ function help {
 }
 
 function full {
-  local _list=${FULL_DEV_STEPS}
+  local _list=${FULL_DEV}
   if [ "$1" == "eduk8s" ]; then
-    _list=${FULL_EDUK8S_STEPS}
+    _list=${FULL_EDUK8S}
+  elif [ "$1" == "knative" ]; then
+    _list=${FULL_KNATIVE}
   fi
   shift # Remove type of full install
   parse_args $*
@@ -409,6 +412,10 @@ then
     full-eduk8s)
       shift # past argument
       full eduk8s "$@"
+      ;;
+    full-knative)
+      shift # past argument
+      full knative "$@"
       ;;
     *)
       help "ingress|cert-manager|registry|kpack|tekton|knative|kubeapps|eduk8s|wavefront|eduk8s-labs|testapp|testknativeapp|full-dev|full-eduk8s"
