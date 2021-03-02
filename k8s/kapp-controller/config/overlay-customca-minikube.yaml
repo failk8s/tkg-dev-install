@@ -1,0 +1,46 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@ if data.values.cluster_type=="minikube":
+
+---
+apiVersion: failk8s.dev/v1alpha1
+kind: SecretCopierConfig
+metadata:
+  name: local-root-ca
+spec:
+  rules:
+  - sourceSecret:
+      name: local-root-ca
+      namespace: cert-manager
+    targetSecret:
+      name: local-root-ca
+    targetNamespaces:
+      nameSelector:
+        matchNames:
+        - kapp-controller
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata": {"name": "kapp-controller"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by="name"
+      - name: kapp-controller
+        volumeMounts:
+        #@overlay/match by=overlay.index(0)
+        #@overlay/insert before=True
+        - name: local-ca
+          mountPath: /etc/ssl/certs/tls.crt
+          readOnly: true
+          subPath: tls.crt
+      volumes:
+      #@overlay/match by=overlay.index(0)
+      #@overlay/insert before=True
+      - name: local-ca
+        secret:
+          secretName: local-root-ca
+
+
+#@ end

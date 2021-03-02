@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 #
 # Note: This script requires bash 4+
 #
@@ -18,6 +18,9 @@ steps["ingress.3.name"]="ingress-certs"
 steps["ingress.3.path"]="k8s/ingress/certs"
 steps["ingress.4.name"]="ingress-secret-operator"
 steps["ingress.4.path"]="k8s/ingress/secret-operator"
+#
+steps['kapp-controller.1.name']='kapp-controller'
+steps['kapp-controller.1.path']='k8s/kapp-controller'
 #
 steps["knative.1.name"]="knative"
 steps["knative.1.path"]="k8s/knative"
@@ -404,6 +407,10 @@ then
     wavefront)
       shift # past argument
       execute wavefront "$@"
+      ;;
+    kapp-controller)
+      shift # past argument
+      execute kapp-controller "$@"
       ;;
     full-dev)
       shift # past argument

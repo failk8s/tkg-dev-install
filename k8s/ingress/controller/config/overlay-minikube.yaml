@@ -12,15 +12,15 @@ spec:
   externalTrafficPolicy:
 
 
-#@overlay/match by=overlay.subset({"kind":"DaemonSet", "metadata": {"name": "envoy"}})
----
-spec:
-  template:
-    spec:
-      #@overlay/match missing_ok=True
-      dnsPolicy: ClusterFirstWithHostNet
-      #@overlay/match missing_ok=True
-      hostNetwork: true
+#! #@overlay/match by=overlay.subset({"kind":"DaemonSet", "metadata": {"name": "envoy"}})
+#! ---
+#! spec:
+#!   template:
+#!     spec:
+#!       #@overlay/match missing_ok=True
+#!       dnsPolicy: ClusterFirstWithHostNet
+#!       #@overlay/match missing_ok=True
+#!       hostNetwork: true
 
 
 #@ end

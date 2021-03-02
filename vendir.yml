@@ -4,6 +4,24 @@ kind: Config
 minimumRequiredVersion: 0.11.0
 directories:
 
+
+##########
+# kapp-controller (https://github.com/vmware-tanzu/carvel-kapp-controller)
+##########
+- path: k8s/kapp-controller
+  contents:
+  - path: upstream
+    githubRelease:
+      slug: vmware-tanzu/carvel-kapp-controller
+      tag: v0.16.0
+      disableAutoChecksumValidation: true
+    includePaths:
+    - release.yml
+  - path: downstream
+    manual: {}
+  - path: config
+    manual: {}
+
 ##########
 # cert-manager (https://github.com/jetstack/cert-manager)
 ##########
