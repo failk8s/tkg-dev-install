@@ -48,7 +48,7 @@ directories:
   - path: upstream/eduk8s
     git:
       url: https://github.com/eduk8s/eduk8s
-      ref: develop # 20.12.03.1
+      ref: 21.04.12.1
     includePaths:
     - resources/crds-v1/**/*
     - resources/operator/**/*

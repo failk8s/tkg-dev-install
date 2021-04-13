@@ -126,13 +126,28 @@ spec:
                               type: string
                             secret:
                               type: string
+                    updates:
+                      type: object
+                      properties:
+                        workshop:
+                          type: boolean
+                          default: false
                 analytics:
                   type: object
                   properties:
                     google:
                       type: object
+                      required:
+                      - trackingId
                       properties:
                         trackingId:
+                          type: string
+                    webhook:
+                      type: object
+                      required:
+                      - url
+                      properties:
+                        url:
                           type: string
                 workshops:
                   type: array
@@ -175,12 +190,10 @@ spec:
                 eduk8s:
                   type: object
                   required:
-                  - namespace
-                  - url
-                  - credentials
-                  - clients
-                  - secrets
+                  - phase
                   properties:
+                    phase:
+                      type: string
                     namespace:
                       type: string
                     url:
@@ -253,3 +266,8 @@ spec:
         priority: 0
         description: The password for accessing admin pages.
         jsonPath: .status.eduk8s.credentials.admin.password
+      - name: Status
+        type: string
+        priority: 0
+        description: Status of training portal deployment.
+        jsonPath: .status.eduk8s.phase
