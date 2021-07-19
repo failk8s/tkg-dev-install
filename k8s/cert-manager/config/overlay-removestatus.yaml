@@ -1,0 +1,7 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind": "CustomResourceDefinition"}),expects=6
+---
+#@overlay/remove
+status:

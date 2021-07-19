@@ -1,0 +1,20 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@ app = "eduk8s"
+
+#@overlay/match by=overlay.subset({"kind": "Service", "apiVersion": "serving.knative.dev/v1"}),expects="0+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  labels:
+    #@overlay/match missing_ok=True
+    app.kubernetes.io/part-of: #@ app
+spec:
+  template:
+    #@overlay/match missing_ok=True
+    metadata:
+      #@overlay/match missing_ok=True
+      labels:
+        #@overlay/match missing_ok=True
+        app.kubernetes.io/part-of: #@ app

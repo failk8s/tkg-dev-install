@@ -14,9 +14,11 @@ rules:
   - events
   - namespaces
   - nodes
+  - nodes/proxy
   - nodes/stats
   - pods
   - replicationcontrollers
+  - secrets
   - services
   verbs:
   - get

@@ -1,0 +1,26 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@ app = "ingress"
+
+#@overlay/match by=overlay.subset({"kind": "Service"}),expects="0+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  labels:
+    #@overlay/match missing_ok=True
+    app.kubernetes.io/part-of: #@ app
+
+#@overlay/match by=overlay.subset({"kind": "Deployment"}),expects="0+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  labels:
+    #@overlay/match missing_ok=True
+    app.kubernetes.io/part-of: #@ app
+spec:
+  template:
+    metadata:
+      labels:
+        #@overlay/match missing_ok=True
+        app.kubernetes.io/part-of: #@ app

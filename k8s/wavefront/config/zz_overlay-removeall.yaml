@@ -11,6 +11,7 @@ metadata:
   name: dummy-wavefront
   namespace: default
 
+#! Removes everything else except the dummy-wavefront resource
 #@overlay/match by=overlay.not_op(overlay.subset({"metadata": {"name": "dummy-wavefront"}})),expects="1+"
 #@overlay/remove
 ---

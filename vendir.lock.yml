@@ -2,7 +2,7 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/jetstack/cert-manager/releases/34373236
+      url: https://api.github.com/repos/jetstack/cert-manager/releases/44643236
     path: upstream/cert-manager
   - manual: {}
     path: downstream
@@ -11,10 +11,10 @@ directories:
   path: k8s/cert-manager
 - contents:
   - git:
-      commitTitle: Update to version 210412.032050.fca670b of educates operator.
-      sha: cf4aa842cc14af6cc4b25ac097a9f8e8eec202c7
+      commitTitle: Update to version 210508.025026.38e63af of educates operator.
+      sha: 7b0abb846fb72f29a34947582f86640fc964a95b
       tags:
-      - 21.04.12.1
+      - 21.05.10.1
     path: upstream/eduk8s
   - manual: {}
     path: downstream
@@ -23,20 +23,20 @@ directories:
   path: k8s/eduk8s
 - contents:
   - git:
-      commitTitle: Update Contour Docker image to v1.10.0....
-      sha: 92420b8e0b123afb475bb7df9f50c85da29592cb
+      commitTitle: Update contour-gateway.yaml...
+      sha: b8136f74def6ca2a6716559ee6df447105b3719d
       tags:
-      - v1.10.0
+      - v1.17.0
     path: controller/upstream/contour
   - manual: {}
     path: controller/downstream
   - manual: {}
     path: controller/config
   - git:
-      commitTitle: Added labelFilter for source CRD (#1461)...
-      sha: 79ea64884bbfc89f9c1f444c9dddd5ce361f31ad
+      commitTitle: 'Merge pull request #2070 from kubernetes-sigs/raffo/bump-ci-timeout...'
+      sha: b5f9d789743113f6af3d4f20f9439842e73a1110
       tags:
-      - v0.7.4
+      - v0.8.0
     path: dns/upstream/external-dns
   - manual: {}
     path: dns/downstream
@@ -59,13 +59,13 @@ directories:
   path: k8s/ingress
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/knative/serving/releases/36293413
+      url: https://api.github.com/repos/knative/serving/releases/45438482
     path: upstream/serving
   - githubRelease:
-      url: https://api.github.com/repos/knative-sandbox/net-contour/releases/36279532
+      url: https://api.github.com/repos/knative-sandbox/net-contour/releases/45439830
     path: upstream/net-contour
   - githubRelease:
-      url: https://api.github.com/repos/knative-sandbox/net-certmanager/releases/36278057
+      url: https://api.github.com/repos/knative-sandbox/net-certmanager/releases/45438965
     path: upstream/net-certmanager
   - manual: {}
     path: downstream
@@ -74,7 +74,7 @@ directories:
   path: k8s/knative
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/pivotal/kpack/releases/36149587
+      url: https://api.github.com/repos/pivotal/kpack/releases/44756915
     path: upstream/kpack
   - manual: {}
     path: downstream
@@ -99,13 +99,13 @@ directories:
   path: k8s/registry
 - contents:
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/pipeline/releases/36626841
+      url: https://api.github.com/repos/tektoncd/pipeline/releases/46086472
     path: upstream/pipeline
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/triggers/releases/36985214
+      url: https://api.github.com/repos/tektoncd/triggers/releases/44120885
     path: upstream/triggers
   - githubRelease:
-      url: https://api.github.com/repos/tektoncd/dashboard/releases/36331634
+      url: https://api.github.com/repos/tektoncd/dashboard/releases/46185247
     path: upstream/dashboard
   - manual: {}
     path: downstream
@@ -122,10 +122,10 @@ directories:
   path: k8s/testapp
 - contents:
   - git:
-      commitTitle: fix pod & container counts (#80)...
-      sha: 5ac4f134c6f9bfa7443fb959615f0c032a1dfc62
+      commitTitle: bump version to 1.6.0 (#186)
+      sha: f3620621490286cec51d7e15443802dd9844bb82
       tags:
-      - v1.2.6
+      - v1.6.0
     path: upstream/collector
   - git:
       commitTitle: bump proxy version

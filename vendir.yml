@@ -13,7 +13,7 @@ directories:
   - path: upstream
     githubRelease:
       slug: vmware-tanzu/carvel-kapp-controller
-      tag: v0.16.0
+      tag: v0.21.0
       disableAutoChecksumValidation: true
     includePaths:
     - release.yml
@@ -30,10 +30,10 @@ directories:
   - path: upstream/cert-manager
     githubRelease:
       slug: jetstack/cert-manager
-      tag: v1.1.0
+      tag: v1.4.0
       disableAutoChecksumValidation: true
     includePaths:
-    - cert-manager.crds.yaml
+#    - cert-manager.crds.yaml
     - cert-manager.yaml
   - path: downstream
     manual: {}
@@ -48,7 +48,7 @@ directories:
   - path: upstream/eduk8s
     git:
       url: https://github.com/eduk8s/eduk8s
-      ref: 21.04.12.1
+      ref: 21.05.10.1
     includePaths:
     - resources/crds-v1/**/*
     - resources/operator/**/*
@@ -65,7 +65,7 @@ directories:
   - path: controller/upstream/contour
     git:
       url: https://github.com/projectcontour/contour
-      ref: v1.10.0
+      ref: v1.17.0
     includePaths:
     - examples/contour/**/*
   - path: controller/downstream
@@ -76,7 +76,7 @@ directories:
   - path: dns/upstream/external-dns
     git:
       url: https://github.com/kubernetes-sigs/external-dns
-      ref: v0.7.4
+      ref: v0.8.0
     includePaths:
     - kustomize/external-dns-*
   - path: dns/downstream
@@ -112,7 +112,7 @@ directories:
   - path: upstream/serving
     githubRelease:
       slug: knative/serving
-      tag: v0.20.0
+      tag: v0.24.0
       disableAutoChecksumValidation: true
     includePaths:
 #    - serving-crds.yaml
@@ -121,14 +121,14 @@ directories:
   - path: upstream/net-contour
     githubRelease:
       slug: knative-sandbox/net-contour
-      tag: v0.20.0
+      tag: v0.24.0
       disableAutoChecksumValidation: true
     includePaths:
     - net-contour.yaml
   - path: upstream/net-certmanager
     githubRelease:
       slug: knative-sandbox/net-certmanager
-      tag: v0.20.0
+      tag: v0.24.0
       disableAutoChecksumValidation: true
     includePaths:
     - net-certmanager.yaml
@@ -145,10 +145,10 @@ directories:
   - path: upstream/kpack
     githubRelease:
       slug: pivotal/kpack
-      tag: v0.1.5
+      tag: v0.3.1
       disableAutoChecksumValidation: true
     includePaths:
-    - release-0.1.5.yaml
+    - release-0.3.1.yaml
   - path: downstream
     manual: {}
   - path: config
@@ -186,21 +186,21 @@ directories:
   - path: upstream/pipeline
     githubRelease:
       slug: tektoncd/pipeline
-      tag: v0.20.1 #! v0.13.2
+      tag: v0.26.0 #! v0.13.2
       disableAutoChecksumValidation: true
     includePaths:
     - release.yaml
   - path: upstream/triggers
     githubRelease:
       slug: tektoncd/triggers
-      tag: v0.11.2 #! v0.6.0
+      tag: v0.14.2 #! v0.6.0
       disableAutoChecksumValidation: true
     includePaths:
     - release.yaml
   - path: upstream/dashboard
     githubRelease:
       slug: tektoncd/dashboard
-      tag: v0.13.0 #! v0.7.1
+      tag: v0.18.1 #! v0.7.1
       disableAutoChecksumValidation: true
     includePaths:
     - tekton-dashboard-release.yaml
@@ -229,7 +229,7 @@ directories:
   - path: upstream/collector
     git:
       url: https://github.com/wavefrontHQ/wavefront-collector-for-kubernetes
-      ref: v1.2.6
+      ref: v1.6.0
     includePaths:
     - deploy/kubernetes/**/*
   - path: upstream/proxy

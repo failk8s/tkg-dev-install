@@ -1,46 +1,18 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
 
 #@ if data.values.cluster_type=="minikube":
 
+#@ data.values.local.root_ca.crt or assert.fail("missing local.root_ca.crt definition")
+
 ---
-apiVersion: failk8s.dev/v1alpha1
-kind: SecretCopierConfig
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: local-root-ca
-spec:
-  rules:
-  - sourceSecret:
-      name: local-root-ca
-      namespace: cert-manager
-    targetSecret:
-      name: local-root-ca
-    targetNamespaces:
-      nameSelector:
-        matchNames:
-        - kapp-controller
-
-#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata": {"name": "kapp-controller"}})
----
-spec:
-  template:
-    spec:
-      containers:
-      #@overlay/match by="name"
-      - name: kapp-controller
-        volumeMounts:
-        #@overlay/match by=overlay.index(0)
-        #@overlay/insert before=True
-        - name: local-ca
-          mountPath: /etc/ssl/certs/tls.crt
-          readOnly: true
-          subPath: tls.crt
-      volumes:
-      #@overlay/match by=overlay.index(0)
-      #@overlay/insert before=True
-      - name: local-ca
-        secret:
-          secretName: local-root-ca
-
+  name: kapp-controller-config
+  namespace: kapp-controller
+data:
+  caCerts: #@ data.values.local.root_ca.crt
 
 #@ end
