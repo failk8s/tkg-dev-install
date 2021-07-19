@@ -128,8 +128,8 @@ directories:
       - v1.6.0
     path: upstream/collector
   - git:
-      commitTitle: bump proxy version
-      sha: a12009736b797a193bdd3e844ab1183574112b26
+      commitTitle: 'Merge pull request #11 from wavefrontHQ/bump-proxy-version-to-10.7...'
+      sha: 804f79b981f5615b014a0b3100d21bcba9e0fa17
     path: upstream/proxy
   - manual: {}
     path: downstream
